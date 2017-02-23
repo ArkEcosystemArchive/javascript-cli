@@ -1,0 +1,33 @@
+{
+  "name": "ark-client",
+  "version": "1.0.0",
+  "description": "Command Line Interface to Ark blockchain",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https:/:github.com/arkecosystem/ark-client.git"
+  },
+  "keywords": [
+    "ark",
+    "blockchain",
+    "spv",
+    "lite",
+    "cli"
+  ],
+  "bin":{
+    "ark-client":"index.js"
+  },
+  "author": "fx.thoorens@ark.io",
+  "license": "MIT",
+  "dependencies": {
+    "arkjs": "github:arkecosystem/ark-js#master",
+    "bip39": "^2.2.0",
+    "colors": "^1.1.2",
+    "figlet": "^1.2.0",
+    "request": "^2.79.0",
+    "vorpal": "^1.11.4"
+  }
+}
