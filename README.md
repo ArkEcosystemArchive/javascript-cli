@@ -21,15 +21,17 @@ ark> help
 
   Commands:
 
-    help [command...]                  Provides help for a given command.
-    exit                               Exits application.
-    connect testnet                    Connect to testnet
-    connect node <url>                 Connect to a server. For example "connect node 5.39.9.251:4000"
-    disconnect                         Disconnect from server or network
-    account status <address>           Get account status
-    account send <amount> <recipient>  Send <amount> ark to <recipient>
-    account delegate <username>        Register new delegate with <username>
-    account create                     Generate a new random cold account
+    help [command...]                     Provides help for a given command.
+    exit                                  Exits application.
+    connect testnet                       Connect to testnet
+    connect node <url>                    Connect to a server. For example "connect node 5.39.9.251:4000"
+    disconnect                            Disconnect from server or network
+    account status <address>              Get account status
+    account send <amount> <recipient>     Send <amount> ark to <recipient>
+    account delegate <username>           Register new delegate with <username>
+    account create                        Generate a new random cold account
+    message sign <message>                Sign a message
+    message verify <message> <publickey>  Verify a message (you will be prompt to provide the signature)
 ```
 
 
