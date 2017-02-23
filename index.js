@@ -193,7 +193,10 @@ vorpal
       if (result.passphrase) {
         var hash = crypto.createHash('sha256');
         hash = hash.update(new Buffer(args.message,"utf-8")).digest();
-        self.log(require("arkjs").crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
+        self.log("public key: ",require("arkjs").crypto.getKeys(result.passphrase).publicKey);
+        self.log("address   : ",require("arkjs").crypto.getKeys(result.passphrase).getAddress());
+        self.log("signature : ",require("arkjs").crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
+
       } else {
         self.log('Aborted.');
         callback();
@@ -202,7 +205,7 @@ vorpal
   });
 
 vorpal
-  .command('message verify <message> <publickey>', 'Verify a message (you will be prompt to provide the signature)')
+  .command('message verify <message> <publickey>', 'Verify the <message> signed by the owner of <publickey> (you will be prompted to provide the signature)')
   .action(function(args, callback) {
 		var self = this;
     return this.prompt({
