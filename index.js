@@ -1,5 +1,6 @@
 #!/usr/bin/env node
 var arkjs = require("arkjs");
+var crypto = require("crypto");
 var figlet = require("figlet");
 var colors = require("colors");
 var request = require("request");
@@ -176,8 +177,60 @@ vorpal
     var passphrase = require("bip39").generateMnemonic();
 		self.log("Seed    - private:",passphrase);
 		self.log("WIF     - private:",require("arkjs").crypto.getKeys(passphrase).toWIF());
-		self.log("Address - public :",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
+		self.log("Address - public :",require("arkjs").crypto.getKeys(passphrase).getAddress());
 		callback();
+  });
+
+vorpal
+  .command('message sign <message>', 'Sign a message')
+  .action(function(args, callback) {
+		var self = this;
+    return this.prompt({
+      type: 'password',
+      name: 'passphrase',
+      message: 'passphrase: ',
+    }, function(result){
+      if (result.passphrase) {
+        var hash = crypto.createHash('sha256');
+        hash = hash.update(new Buffer(args.message,"utf-8")).digest();
+        self.log(require("arkjs").crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
+      } else {
+        self.log('Aborted.');
+        callback();
+      }
+    });
+  });
+
+vorpal
+  .command('message verify <message> <publickey>', 'Verify a message (you will be prompt to provide the signature)')
+  .action(function(args, callback) {
+		var self = this;
+    return this.prompt({
+      type: 'input',
+      name: 'signature',
+      message: 'signature: ',
+    }, function(result){
+      if (result.signature) {
+        try{
+          var hash = crypto.createHash('sha256');
+          hash = hash.update(new Buffer(args.message,"utf-8")).digest();
+          var signature = new Buffer(result.signature, "hex");
+        	var publickey= new Buffer(args.publickey, "hex");
+        	var ecpair = require("arkjs").ECPair.fromPublicKeyBuffer(publickey);
+        	var ecsignature = require("arkjs").ECSignature.fromDER(signature);
+        	var res = ecpair.verify(hash, ecsignature);
+          self.log(res);
+        }
+        catch(error){
+          self.log("Failed: ", error);
+        }
+        callback();
+      } else {
+        self.log('Aborted.');
+        callback();
+      }
+    });
+
   });
 
 vorpal.history('ark-client');
