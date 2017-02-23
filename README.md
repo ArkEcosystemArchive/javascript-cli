@@ -4,7 +4,7 @@ CLI client for ark blockchain
 # Installation
 You need to have node installed. Then
 ```
-$> npm install -g arkecosystem/ark-clien#master
+$> npm install -g arkecosystem/ark-client#master
 $> ark-client
     ___         __      _________            __
    /   |  _____/ /__   / ____/ (_)__  ____  / /_
@@ -17,7 +17,7 @@ ark>
 
 # Usage
 ```
-ark testnet> help
+ark> help
 
   Commands:
 
