@@ -17,7 +17,7 @@ ark>
 
 # Usage
 ```
-ark testnet> help
+ark> help
 
   Commands:
 
