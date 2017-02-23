@@ -90,6 +90,10 @@ vorpal
     var address=args.address;
     request.get('http://'+server+'/api/accounts?address='+address, function(err, response, body){
       var a = JSON.parse(body).account;
+      if(!a){
+        self.log("Unknown on the blockchain");
+        return callback();
+      }
       for(var i in a){
         if(!a[i] || a[i].length==0) delete a[i];
       }
