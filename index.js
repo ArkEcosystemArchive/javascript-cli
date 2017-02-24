@@ -163,7 +163,6 @@ vorpal
             pointChar: '█',
             negativePointChar: '░'
           })));
-          self.log(cowsay.say({text:"Looks right!"}));
         });
       }
     });
@@ -338,6 +337,25 @@ vorpal
       }
     });
 
+  });
+var sharkspinner;
+vorpal
+  .command("shARK")
+  .hidden()
+  .action(function(args, callback) {
+		var self = this;
+    self.log(colors.red(figlet.textSync("shARK")));
+    sharkspinner = ora({text:"Watch out, the shARK attack!",spinner:"shark"}).start();
+    callback();
+  });
+
+vorpal
+  .command("spARKaaaaa!")
+  .hidden()
+  .action(function(args, callback) {
+    this.log(cowsay.say({text:"TADA MOON!"}));
+		sharkspinner && sharkspinner.stop();
+    callback();
   });
 
 vorpal.history('ark-client');
