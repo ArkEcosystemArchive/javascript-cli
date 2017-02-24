@@ -17,16 +17,24 @@
     "lite",
     "cli"
   ],
-  "bin":{
-    "ark-client":"index.js"
+  "bin": {
+    "ark-client": "index.js"
   },
   "author": "fx.thoorens@ark.io",
   "license": "MIT",
   "dependencies": {
     "arkjs": "github:arkecosystem/ark-js#master",
+    "ascii-table": "0.0.9",
+    "asciichart": "^0.1.7",
+    "async": "^2.1.5",
     "bip39": "^2.2.0",
+    "chart": "github:jstrace/chart",
+    "cli-spinners": "^1.0.0",
     "colors": "^1.1.2",
+    "cowsay": "^1.1.9",
     "figlet": "^1.2.0",
+    "le-table": "^6.1.4",
+    "ora": "^1.1.0",
     "request": "^2.79.0",
     "vorpal": "^1.11.4"
   }

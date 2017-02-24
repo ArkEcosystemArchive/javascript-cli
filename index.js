@@ -4,15 +4,22 @@ var crypto = require("crypto");
 var figlet = require("figlet");
 var colors = require("colors");
 var request = require("request");
+var asciichart = require ('asciichart');
+var chart = require ('chart');
+var cliSpinners = require('cli-spinners');
+var Table = require('ascii-table');
+var ora = require('ora');
+var cowsay = require('cowsay');
+var async = require('async');
 var vorpal = require("vorpal")();
 
 var server;
 var network;
 
 var networks = {
-  testnet:{
-    nethash:"4befbd4cd1f2f10cbe69ac0b494b5ce070595ed23ee7abd386867c4edcdaf3bd",
-    peers:[
+  testnet: {
+    nethash: "4befbd4cd1f2f10cbe69ac0b494b5ce070595ed23ee7abd386867c4edcdaf3bd",
+    peers: [
       "5.39.9.245:4000",
       "5.39.9.246:4000",
       "5.39.9.247:4000",
@@ -21,6 +28,15 @@ var networks = {
     ]
   }
 };
+
+function getNetworkFromNethash(nethash){
+  for(var n in networks){
+    if(networks[n].nethash == nethash){
+      return n;
+    }
+  }
+  return null;
+}
 
 function postTransaction(transaction, cb){
   request(
@@ -36,7 +52,7 @@ function postTransaction(transaction, cb){
       body: {transactions:[transaction]}
     },
     cb
-  )
+  );
 }
 
 
@@ -59,12 +75,21 @@ vorpal
 		var self = this;
     server=args.url;
     request.get('http://'+server+'/api/blocks/getNethash', function(err, response, body){
-      self.log("Connected to network " + JSON.parse(body).nethash);
+      if(err){
+        self.log(colors.red("Failed to connect to server "+server+" - "+err));
+        server=null;
+        self.delimiter('ark>');
+        return callback();
+      }
+      var nethash = JSON.parse(body).nethash;
+      var networkname = getNetworkFromNethash(nethash);
+      network = networks[networkname];
+      self.log("Connected to network " + nethash + colors.green(" ("+networkname+")"));
       self.delimiter('ark '+server+'>');
+      request.get('http://'+server+'/api/blocks/getHeight', function(err, response, body){
+        self.log("Node height ", JSON.parse(body).height);
+      });
       callback();
-    });
-    request.get('http://'+server+'/api/blocks/getHeight', function(err, response, body){
-      self.log("Node height ", JSON.parse(body).height);
     });
   });
 
@@ -80,6 +105,72 @@ vorpal
   });
 
 vorpal
+  .command('network stats', 'Get stats from network')
+  .action(function(args, callback) {
+    var self = this;
+    if(!server){
+      self.log("Please connect to node or network before");
+      return callback();
+    }
+		request.get('http://'+server+'/api/peers', function(err, response, body){
+      if(err){
+        self.log(colors.red("Can't get peers from network: " + err));
+        return callback();
+      }
+      else {
+        var peers = JSON.parse(body).peers.map(function(peer){
+          return peer.string;
+        });
+        self.log("Checking "+peers.length+" peers");
+        var spinner = ora({text:"0%",spinner:"shark"}).start();
+        var heights={};
+        var delays={};
+        var count=0;
+        async.eachLimit(peers, 3, function(peer, cb){
+          var delay=new Date().getTime();
+          request.get('http://'+server+'/api/blocks/getHeight', function(err, response, body){
+            delay=new Date().getTime()-delay;
+            if(delays[delay]){
+              delays[delay]++;
+            }
+            else{
+              delays[delay]=1;
+            }
+            count++;
+            spinner.text=Math.floor(100*count/peers.length)+"%";
+            if(err){
+              return cb();
+            }
+            else{
+              var height=JSON.parse(body).height;
+              if(heights[height]){
+                heights[height]++;
+              }
+              else{
+                heights[height]=1;
+              }
+              return cb();
+            }
+          });
+        },function(err){
+          spinner.stop();
+          self.log("Finished");
+          self.log(heights);
+          self.log(colors.green(figlet.textSync("delays")));
+          self.log(colors.green(chart(Object.values(delays),{
+            width: 80,
+            height: 20,
+            pointChar: '█',
+            negativePointChar: '░'
+          })));
+          self.log(cowsay.say({text:"Looks right!"}));
+        });
+      }
+    });
+    callback();
+  });
+
+vorpal
   .command('account status <address>', 'Get account status')
   .action(function(args, callback) {
     var self = this;
@@ -90,6 +181,7 @@ vorpal
     var address=args.address;
     request.get('http://'+server+'/api/accounts?address='+address, function(err, response, body){
       var a = JSON.parse(body).account;
+
       if(!a){
         self.log("Unknown on the blockchain");
         return callback();
@@ -97,15 +189,23 @@ vorpal
       for(var i in a){
         if(!a[i] || a[i].length==0) delete a[i];
       }
+      delete a.address;
+      var table = new Table();
+      table.setHeading(Object.keys(a));
+      table.addRow(Object.values(a));
+      self.log(table.toString());
       request.get('http://'+server+'/api/delegates/get/?publicKey='+a.publicKey, function(err, response, body){
         var body = JSON.parse(body);
         if(body.success){
           var delegate=body.delegate;
-          for(var j in delegate){
-            a[j]=delegate[j];
-          }
+          delete delegate.address;
+          delete delegate.publicKey;
+          table = new Table("Delegate");
+          table.setHeading(Object.keys(delegate));
+          table.addRow(Object.values(delegate));
+          self.log(table.toString());
         }
-        self.log(a);
+
         callback();
       });
     });
