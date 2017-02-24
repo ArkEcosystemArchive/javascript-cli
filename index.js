@@ -353,8 +353,15 @@ vorpal
   .command("spARKaaaaa!")
   .hidden()
   .action(function(args, callback) {
-    this.log(cowsay.say({text:"TADA MOON!"}));
-		sharkspinner && sharkspinner.stop();
+    var time = 0;
+    var self=this;
+    sharkspinner && sharkspinner.stop();
+    ["tux","meow","bunny","cower","dragon-and-cow"].forEach(function(spark){
+      setTimeout(function(){
+        self.log(cowsay.say({text:"SPAAAAARKKKAAAAAAA!", f:spark}));
+  		}, time++*1000);
+    });
+
     callback();
   });
 
