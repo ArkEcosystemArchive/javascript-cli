@@ -126,7 +126,7 @@ vorpal
         var heights={};
         var delays={};
         var count=0;
-        async.eachLimit(peers, 3, function(peer, cb){
+        async.eachLimit(peers, 1, function(peer, cb){
           var delay=new Date().getTime();
           request.get('http://'+server+'/api/blocks/getHeight', function(err, response, body){
             delay=new Date().getTime()-delay;
