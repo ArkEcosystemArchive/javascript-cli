@@ -458,7 +458,7 @@ vorpal
     var passphrase = require("bip39").generateMnemonic();
 		self.log("Seed    - private:",passphrase);
 		self.log("WIF     - private:",require("arkjs").crypto.getKeys(passphrase).toWIF());
-		self.log("Address - public :",require("arkjs").crypto.getKeys(passphrase).getAddress());
+		self.log("Address - public :",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
 		callback();
   });
 
@@ -470,12 +470,12 @@ vorpal
     var self = this;
     while(address.toLowerCase().indexOf(args.string) == -1){
       passphrase = require("bip39").generateMnemonic();
-      address = require("arkjs").crypto.getKeys(passphrase).getAddress();
+      address = require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
     }
 
     self.log("Seed    - private:",passphrase);
     self.log("WIF     - private:",require("arkjs").crypto.getKeys(passphrase).toWIF());
-    self.log("Address - public :",require("arkjs").crypto.getKeys(passphrase).getAddress());
+    self.log("Address - public :",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
 		callback();
   });
 
@@ -492,7 +492,7 @@ vorpal
         var hash = crypto.createHash('sha256');
         hash = hash.update(new Buffer(args.message,"utf-8")).digest();
         self.log("public key: ",require("arkjs").crypto.getKeys(result.passphrase).publicKey);
-        self.log("address   : ",require("arkjs").crypto.getKeys(result.passphrase).getAddress());
+        self.log("address   : ",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(result.passphrase).publicKey));
         self.log("signature : ",require("arkjs").crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
 
       } else {
