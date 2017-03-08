@@ -470,7 +470,7 @@ vorpal
     var self = this;
     while(address.toLowerCase().indexOf(args.string) == -1){
       passphrase = require("bip39").generateMnemonic();
-      address = require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
+      address = require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey);
     }
 
     self.log("Seed    - private:",passphrase);
