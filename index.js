@@ -11,7 +11,9 @@ var Table = require('ascii-table');
 var ora = require('ora');
 var cowsay = require('cowsay');
 var async = require('async');
-var vorpal = require("vorpal")();
+var vorpal = require('vorpal')();
+var cluster = require('cluster');
+var child_process = require('child_process');
 
 var blessed = require('blessed');
 var contrib = require('blessed-contrib');
@@ -465,18 +467,37 @@ vorpal
 vorpal
   .command('account vanity <string>', 'Generate an address containing lowercase <string> (WARNING you could wait for long)')
   .action(function(args, callback) {
-    address = "";
-    var passphrase;
-    var self = this;
-    while(address.toLowerCase().indexOf(args.string) == -1){
-      passphrase = require("bip39").generateMnemonic();
-      address = require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey);
+    var self=this;
+    var count=0;
+    var numCPUs = require('os').cpus().length;
+    var cps=[];
+    self.log("Spawning process to "+numCPUs+" cpus");
+    var spinner = ora({text:"passphrases tested: 0",spinner:"shark"}).start();
+    for (var i = 0; i < numCPUs; i++) {
+      var cp=child_process.fork(__dirname+"/vanity.js");
+      cps.push(cp);
+      cp.on('message', function(message){
+        if(message.passphrase){
+          spinner.stop();
+          var passphrase = message.passphrase;
+          self.log("Found after",count,"passphrases tested");
+          self.log("Seed    - private:",passphrase);
+          self.log("WIF     - private:",require("arkjs").crypto.getKeys(passphrase).toWIF());
+          self.log("Address - public :",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
+
+          for(var killid in cps){
+            cps[killid].kill();
+          }
+          callback();
+        }
+        if(message.count){
+          count += message.count;
+          spinner.text="passphrases tested: "+count;
+        }
+      });
+      cp.send({string:args.string});
     }
 
-    self.log("Seed    - private:",passphrase);
-    self.log("WIF     - private:",require("arkjs").crypto.getKeys(passphrase).toWIF());
-    self.log("Address - public :",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
-		callback();
   });
 
 vorpal
