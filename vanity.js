@@ -9,7 +9,8 @@ process.on("message", function(message){
     while(address.toLowerCase().indexOf(message.string) == -1){
       passphrase = bip39.generateMnemonic();
       address = arkjs.crypto.getAddress(arkjs.crypto.getKeys(passphrase).publicKey);
-      if(++count%10 == 0){
+      if(++count == 10){
+        count=0;
         process.send({ count: 10 });
       }
     }

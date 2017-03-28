@@ -121,6 +121,8 @@ var contrib = require('blessed-contrib');
 
 var server;
 var network;
+var arkticker = {};
+var currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
 
 var networks = {
   testnet: {
@@ -131,6 +133,87 @@ var networks = {
       "5.39.9.247:4000",
       "5.39.9.248:4000",
       "5.39.9.249:4000"
+    ]
+  },
+  mainnet: {
+    nethash: "6e84d08bd299ed97c212c886c98a57e36545c8f5d645ca7eeae63a8bd62d8988",
+    peers: [
+      "5.39.9.240:4001",
+      "5.39.9.241:4001",
+      "5.39.9.242:4001",
+      "5.39.9.243:4001",
+      "5.39.9.244:4001",
+      "5.39.9.250:4001",
+      "5.39.9.251:4001",
+      "5.39.9.252:4001",
+      "5.39.9.253:4001",
+      "5.39.9.254:4001",
+      "5.39.9.255:4001",
+      "5.39.53.48:4001",
+      "5.39.53.49:4001",
+      "5.39.53.50:4001",
+      "5.39.53.51:4001",
+      "5.39.53.52:4001",
+      "5.39.53.53:4001",
+      "5.39.53.54:4001",
+      "5.39.53.55:4001",
+      "37.59.129.160:4001",
+      "37.59.129.161:4001",
+      "37.59.129.162:4001",
+      "37.59.129.163:4001",
+      "37.59.129.164:4001",
+      "37.59.129.165:4001",
+      "37.59.129.166:4001",
+      "37.59.129.167:4001",
+      "37.59.129.168:4001",
+      "37.59.129.169:4001",
+      "37.59.129.170:4001",
+      "37.59.129.171:4001",
+      "37.59.129.172:4001",
+      "37.59.129.173:4001",
+      "37.59.129.174:4001",
+      "37.59.129.175:4001",
+      "193.70.72.80:4001",
+      "193.70.72.81:4001",
+      "193.70.72.82:4001",
+      "193.70.72.83:4001",
+      "193.70.72.84:4001",
+      "193.70.72.85:4001",
+      "193.70.72.86:4001",
+      "193.70.72.87:4001",
+      "193.70.72.88:4001",
+      "193.70.72.89:4001",
+      "193.70.72.90:4001",
+      "167.114.29.37:4001",
+      "167.114.29.38:4001",
+      "167.114.29.39:4001",
+      "167.114.29.40:4001",
+      "167.114.29.41:4001",
+      "167.114.29.42:4001",
+      "167.114.29.43:4001",
+      "167.114.29.44:4001",
+      "167.114.29.45:4001",
+      "167.114.29.46:4001",
+      "167.114.29.47:4001",
+      "167.114.29.48:4001",
+      "167.114.29.49:4001",
+      "167.114.29.50:4001",
+      "167.114.29.51:4001",
+      "167.114.29.52:4001",
+      "167.114.29.53:4001",
+      "167.114.29.54:4001",
+      "167.114.29.55:4001",
+      "167.114.29.56:4001",
+      "167.114.29.57:4001",
+      "167.114.29.58:4001",
+      "167.114.29.59:4001",
+      "167.114.29.60:4001",
+      "167.114.29.61:4001",
+      "167.114.29.62:4001",
+      "167.114.29.63:4001",
+      "167.114.43.32:4001",
+      "167.114.43.33:4001",
+      "167.114.43.34:4001"
     ]
   }
 };
@@ -146,7 +229,7 @@ function getNetworkFromNethash(nethash){
 
 function findEnabledPeers(cb){
   var peers=[];
-  getFromServer('http://'+server+'/peer/list', function(err, response, body){
+  getFromNode('http://'+server+'/peer/list', function(err, response, body){
 
     if(err){
       vorpal.log(colors.red("Can't get peers from network: " + err));
@@ -155,9 +238,11 @@ function findEnabledPeers(cb){
     else {
       var respeers = JSON.parse(body).peers.map(function(peer){
         return peer.ip+":"+peer.port;
+      }).filter(function(peer){
+        return peer.status=="OK";
       });
       async.each(respeers, function(peer, cb){
-        getFromServer('http://'+peer+'/api/blocks/getHeight', function(err, response, body){
+        getFromNode('http://'+peer+'/api/blocks/getHeight', function(err, response, body){
           if(body != "Forbidden"){
             peers.push(peer);
           }
@@ -187,11 +272,11 @@ function postTransaction(transaction, cb){
   );
 }
 
-function getFromServer(api, cb){
+function getFromNode(url, cb){
   nethash=network?network.nethash:"";
   request(
     {
-      url: api,
+      url: url,
       headers: {
         nethash: nethash,
         version: '1.0.0',
@@ -202,6 +287,31 @@ function getFromServer(api, cb){
     cb
   );
 }
+
+function getARKTicker(currency){
+  request({url: "https://api.coinmarketcap.com/v1/ticker/ark/?convert="+currency}, function(err, response, body){
+    arkticker[currency]=JSON.parse(body)[0];
+  });
+}
+
+vorpal
+  .command('connect mainnet', 'Connect to mainnet')
+  .action(function(args, callback) {
+		var self = this;
+    network=networks.mainnet;
+    server=network.peers[Math.floor(Math.random()*1000)%network.peers.length];
+    findEnabledPeers(function(peers){
+      if(peers.length>0){
+        server=peers[0];
+        networks.testnet.peers=peers;
+      }
+    });
+    getFromNode('http://'+server+'/peer/status', function(err, response, body){
+      self.log("Node: " + server + ", height: " + JSON.parse(body).height);
+      self.delimiter('ark mainnet>');
+      callback();
+    });
+  });
 
 vorpal
   .command('connect testnet', 'Connect to testnet')
@@ -215,19 +325,20 @@ vorpal
         networks.testnet.peers=peers;
       }
     });
-    getFromServer('http://'+server+'/peer/height', function(err, response, body){
+    getFromNode('http://'+server+'/peer/status', function(err, response, body){
       self.log("Node: " + server + ", height: " + JSON.parse(body).height);
       self.delimiter('ark testnet>');
       callback();
     });
   });
 
+
 vorpal
   .command('connect node <url>', 'Connect to a server. For example "connect node 5.39.9.251:4000"')
   .action(function(args, callback) {
 		var self = this;
     server=args.url;
-    getFromServer('http://'+server+'/api/blocks/getNethash', function(err, response, body){
+    getFromNode('http://'+server+'/api/blocks/getNethash', function(err, response, body){
       if(err){
         self.log(colors.red("Public API unreacheable on this server "+server+" - "+err));
         server=null;
@@ -249,7 +360,7 @@ vorpal
       network = networks[networkname];
       self.log("Connected to network " + nethash + colors.green(" ("+networkname+")"));
       self.delimiter('ark '+server+'>');
-      getFromServer('http://'+server+'/peer/height', function(err, response, body){
+      getFromNode('http://'+server+'/peer/status', function(err, response, body){
         self.log("Node height ", JSON.parse(body).height);
       });
       callback();
@@ -275,23 +386,23 @@ vorpal
       self.log("Please connect to node or network before");
       return callback();
     }
-		getFromServer('http://'+server+'/peer/list', function(err, response, body){
+		getFromNode('http://'+server+'/peer/list', function(err, response, body){
       if(err){
         self.log(colors.red("Can't get peers from network: " + err));
         return callback();
       }
       else {
         var peers = JSON.parse(body).peers.map(function(peer){
-          return peer.string;
+          return peer.ip+":"+peer.port;
         });
         self.log("Checking "+peers.length+" peers");
         var spinner = ora({text:"0%",spinner:"shark"}).start();
         var heights={};
         var delays={};
         var count=0;
-        async.eachLimit(peers, 3, function(peer, cb){
+        async.each(peers, function(peer, cb){
           var delay=new Date().getTime();
-          getFromServer('http://'+peer+'/peer/height', function(err, response, hbody){
+          getFromNode('http://'+peer+'/peer/status', function(err, response, hbody){
             delay=new Date().getTime()-delay;
             if(delays[10*Math.floor(delay/10)]){
               delays[10*Math.floor(delay/10)]++;
@@ -306,6 +417,9 @@ vorpal
             }
             else{
               var height=JSON.parse(hbody).height;
+              if(!height){
+                return cb();
+              }
               if(heights[height]){
                 heights[height]++;
               }
@@ -358,7 +472,7 @@ vorpal
       return callback();
     }
     var address=args.address;
-    getFromServer('http://'+server+'/api/accounts?address='+address, function(err, response, body){
+    getFromNode('http://'+server+'/api/accounts?address='+address, function(err, response, body){
       var a = JSON.parse(body).account;
 
       if(!a){
@@ -373,7 +487,7 @@ vorpal
       table.setHeading(Object.keys(a));
       table.addRow(Object.values(a));
       self.log(table.toString());
-      getFromServer('http://'+server+'/api/delegates/get/?publicKey='+a.publicKey, function(err, response, body){
+      getFromNode('http://'+server+'/api/delegates/get/?publicKey='+a.publicKey, function(err, response, body){
         var body = JSON.parse(body);
         if(body.success){
           var delegate=body.delegate;
@@ -391,33 +505,82 @@ vorpal
   });
 
 vorpal
-  .command('account send <amount> <recipient>', 'Send <amount> ark to <recipient>')
+  .command('account send <amount> <recipient>', 'Send <amount> ark to <recipient>. <amount> format examples: 10, USD10.4, EUR100')
   .action(function(args, callback) {
 		var self = this;
     if(!server){
       self.log("please connect to node or network before");
       return callback();
     }
-    return this.prompt({
-      type: 'password',
-      name: 'passphrase',
-      message: 'passphrase: ',
-    }, function(result){
-      if (result.passphrase) {
-        var transaction = require("arkjs").transaction.createTransaction(args.recipient, parseInt(args.amount*100000000), null, result.passphrase);
-        postTransaction(transaction, function(err, response, body){
-          if(body.success){
-            self.log(colors.green("Transaction sent successfully with id "+body.transactionIds[0]));
+    var currency;
+    for(var i in currencies){
+      if(args.amount.startsWith(currencies[i])){
+        currency=currencies[i];
+        args.amount = Number(args.amount.replace(currency,""));
+        getARKTicker(currency);
+        break;
+      }
+    }
+
+    async.waterfall([
+      function(seriesCb){
+        self.prompt({
+          type: 'password',
+          name: 'passphrase',
+          message: 'passphrase: ',
+        }, function(result){
+          if (result.passphrase) {
+            return seriesCb(null, result.passphrase);
           }
           else{
-            self.log(colors.red("Failed to send transaction: "+body.error));
+            return seriesCb("Aborted.");
           }
-          callback();
         });
-      } else {
-        self.log('Aborted.');
-        callback();
+      },
+      function(passphrase, seriesCb){
+        var arkamount = args.amount;
+        if(currency){
+          if(!arkticker[currency]){
+            return seriesCb("Can't get price from market. Aborted.");
+          }
+          arkamount = parseInt(args.amount * 100000000 / Number(arkticker[currency]["price_"+currency.toLowerCase()]))
+        }
+        var transaction = require("arkjs").transaction.createTransaction(args.recipient, arkamount, null, passphrase);
+        self.prompt({
+          type: 'confirm',
+          name: 'continue',
+          default: false,
+          message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+')':'')+' to '+args.recipient+' now',
+        }, function(result){
+          if (result.continue) {
+            return seriesCb(null, transaction);
+          }
+          else {
+            return seriesCb("Aborted.")
+          }
+        });
+      },
+      function(transaction, seriesCb){
+        postTransaction(transaction, function(err, response, body){
+          if(err){
+            seriesCb("Failed to send transaction: " + err);
+          }
+          else if(body.success){
+            seriesCb(null, transaction);
+          }
+          else {
+            seriesCb("Failed to send transaction: " + body.error);
+          }
+        });
       }
+    ], function(err, transaction){
+      if(err){
+        self.log(colors.red(err));
+      }
+      else{
+        self.log(colors.green("Transaction sent successfully with id "+transaction.id));
+      }
+      return callback();
     });
   });
 
@@ -443,11 +606,11 @@ vorpal
           else{
             self.log(colors.red("Failed to send transaction: "+body.error));
           }
-          callback();
+          return callback();
         });
       } else {
         self.log('Aborted.');
-        callback();
+        return callback();
       }
     });
   });
@@ -465,7 +628,7 @@ vorpal
   });
 
 vorpal
-  .command('account vanity <string>', 'Generate an address containing lowercase <string> (WARNING you could wait for long)')
+  .command('account vanity <string>', 'Generate an address containing lowercased <string> (WARNING you could wait for long)')
   .action(function(args, callback) {
     var self=this;
     var count=0;
@@ -495,7 +658,7 @@ vorpal
           spinner.text="passphrases tested: "+count;
         }
       });
-      cp.send({string:args.string});
+      cp.send({string:args.string.toLowerCase()});
     }
 
   });
