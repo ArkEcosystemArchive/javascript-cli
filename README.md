@@ -24,6 +24,7 @@ ark> help
     help [command...]                     Provides help for a given command.
     exit                                  Exits application.
     connect testnet                       Connect to testnet
+    connect mainnet                       Connect to mainnet
     connect node <url>                    Connect to a server. For example "connect node 5.39.9.251:4000"
     disconnect                            Disconnect from server or network
     account status <address>              Get account status
