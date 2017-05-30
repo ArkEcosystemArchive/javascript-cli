@@ -2,7 +2,9 @@ var bip39 = require("bip39");
 var arkjs = require("arkjs");
 
 process.on("message", function(message){
+
   if(message.string){
+    arkjs.crypto.setNetworkVersion(message.version);
     var address = "";
     var passphrase;
     var count = 0;

@@ -126,13 +126,13 @@ var currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", 
 
 var networks = {
   devnet: {
-    nethash: "4befbd4cd1f2f10cbe69ac0b494b5ce070595ed23ee7abd386867c4edcdaf3bd",
+    nethash: "578e820911f24e039733b45e4882b73e301f813a0d2c31330dafda84534ffa23",
     peers: [
-      "5.39.9.245:4000",
-      "5.39.9.246:4000",
-      "5.39.9.247:4000",
-      "5.39.9.248:4000",
-      "5.39.9.249:4000"
+      "167.114.29.51:4002",
+      "167.114.29.52:4002",
+      "167.114.29.53:4002",
+      "167.114.29.54:4002",
+      "167.114.29.55:4002"
     ]
   },
   mainnet: {
@@ -183,37 +183,7 @@ var networks = {
       "193.70.72.87:4001",
       "193.70.72.88:4001",
       "193.70.72.89:4001",
-      "193.70.72.90:4001",
-      "167.114.29.37:4001",
-      "167.114.29.38:4001",
-      "167.114.29.39:4001",
-      "167.114.29.40:4001",
-      "167.114.29.41:4001",
-      "167.114.29.42:4001",
-      "167.114.29.43:4001",
-      "167.114.29.44:4001",
-      "167.114.29.45:4001",
-      "167.114.29.46:4001",
-      "167.114.29.47:4001",
-      "167.114.29.48:4001",
-      "167.114.29.49:4001",
-      "167.114.29.50:4001",
-      "167.114.29.51:4001",
-      "167.114.29.52:4001",
-      "167.114.29.53:4001",
-      "167.114.29.54:4001",
-      "167.114.29.55:4001",
-      "167.114.29.56:4001",
-      "167.114.29.57:4001",
-      "167.114.29.58:4001",
-      "167.114.29.59:4001",
-      "167.114.29.60:4001",
-      "167.114.29.61:4001",
-      "167.114.29.62:4001",
-      "167.114.29.63:4001",
-      "167.114.43.32:4001",
-      "167.114.43.33:4001",
-      "167.114.43.34:4001"
+      "193.70.72.90:4001"
     ]
   }
 };
@@ -295,39 +265,24 @@ function getARKTicker(currency){
 }
 
 vorpal
-  .command('connect mainnet', 'Connect to mainnet')
+  .command('connect <network>', 'Connect to network. Network is devnet or mainnet')
   .action(function(args, callback) {
 		var self = this;
-    network=networks.mainnet;
-    server=network.peers[Math.floor(Math.random()*1000)%network.peers.length];
+    network = networks[args.network];
+    server = network.peers[Math.floor(Math.random()*1000)%network.peers.length];
     findEnabledPeers(function(peers){
       if(peers.length>0){
         server=peers[0];
-        networks.testnet.peers=peers;
+        network.peers=peers;
       }
+    });
+    getFromNode('http://'+server+'/api/loader/autoconfigure', function(err, response, body){
+      network.config = JSON.parse(body).network;
+      console.log(network.config);
     });
     getFromNode('http://'+server+'/peer/status', function(err, response, body){
       self.log("Node: " + server + ", height: " + JSON.parse(body).height);
-      self.delimiter('ark mainnet>');
-      callback();
-    });
-  });
-
-vorpal
-  .command('connect testnet', 'Connect to testnet')
-  .action(function(args, callback) {
-		var self = this;
-    network=networks.testnet;
-    server=network.peers[Math.floor(Math.random()*1000)%network.peers.length];
-    findEnabledPeers(function(peers){
-      if(peers.length>0){
-        server=peers[0];
-        networks.testnet.peers=peers;
-      }
-    });
-    getFromNode('http://'+server+'/peer/status', function(err, response, body){
-      self.log("Node: " + server + ", height: " + JSON.parse(body).height);
-      self.delimiter('ark testnet>');
+      self.delimiter('ark '+args.network+'>');
       callback();
     });
   });
@@ -358,6 +313,17 @@ vorpal
 
       var networkname = getNetworkFromNethash(nethash);
       network = networks[networkname];
+      if(!network){
+        network = {
+          nethash: nethash,
+          peers:[server]
+        }
+        networks[nethash]=network;
+      }
+      getFromNode('http://'+server+'/api/loader/autoconfigure', function(err, response, body){
+        network.config = JSON.parse(body).network;
+        console.log(network.config);
+      });
       self.log("Connected to network " + nethash + colors.green(" ("+networkname+")"));
       self.delimiter('ark '+server+'>');
       getFromNode('http://'+server+'/peer/status', function(err, response, body){
@@ -525,7 +491,7 @@ vorpal
       },
       function(passphrase, seriesCb){
         var delegate = args.name;
-        var transaction = require("arkjs").delegates.createVote(passphrase);
+        var transaction = arkjs.delegates.createVote(passphrase);
         self.prompt({
           type: 'confirm',
           name: 'continue',
@@ -605,7 +571,7 @@ vorpal
           }
           arkamount = parseInt(args.amount * 100000000 / Number(arkticker[currency]["price_"+currency.toLowerCase()]))
         }
-        var transaction = require("arkjs").transaction.createTransaction(args.recipient, arkamount, null, passphrase);
+        var transaction = arkjs.transaction.createTransaction(args.recipient, arkamount, null, passphrase);
         self.prompt({
           type: 'confirm',
           name: 'continue',
@@ -658,7 +624,7 @@ vorpal
       message: 'passphrase: ',
     }, function(result){
       if (result.passphrase) {
-        var transaction = require("arkjs").delegate.createDelegate(result.passphrase, args.username);
+        var transaction = arkjs.delegate.createDelegate(result.passphrase, args.username);
         postTransaction(transaction, function(err, response, body){
           if(body.success){
             self.log(colors.green("Transaction sent successfully with id "+body.transactionIds[0]));
@@ -680,10 +646,15 @@ vorpal
   .command('account create', 'Generate a new random cold account')
   .action(function(args, callback) {
 		var self = this;
+    if(!server){
+      self.log("please connect to node or network before, in order to retrieve necessery information about address prefixing");
+      return callback();
+    }
+    arkjs.crypto.setNetworkVersion(network.config.version);
     var passphrase = require("bip39").generateMnemonic();
 		self.log("Seed    - private:",passphrase);
-		self.log("WIF     - private:",require("arkjs").crypto.getKeys(passphrase).toWIF());
-		self.log("Address - public :",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
+		self.log("WIF     - private:",arkjs.crypto.getKeys(passphrase).toWIF());
+		self.log("Address - public :",arkjs.crypto.getAddress(arkjs.crypto.getKeys(passphrase).publicKey));
 		callback();
   });
 
@@ -691,6 +662,12 @@ vorpal
   .command('account vanity <string>', 'Generate an address containing lowercased <string> (WARNING you could wait for long)')
   .action(function(args, callback) {
     var self=this;
+    if(!server){
+      self.log("please connect to node or network before, in order to retrieve necessery information about address prefixing");
+      return callback();
+    }
+
+    arkjs.crypto.setNetworkVersion(network.config.version);
     var count=0;
     var numCPUs = require('os').cpus().length;
     var cps=[];
@@ -705,8 +682,8 @@ vorpal
           var passphrase = message.passphrase;
           self.log("Found after",count,"passphrases tested");
           self.log("Seed    - private:",passphrase);
-          self.log("WIF     - private:",require("arkjs").crypto.getKeys(passphrase).toWIF());
-          self.log("Address - public :",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(passphrase).publicKey));
+          self.log("WIF     - private:",arkjs.crypto.getKeys(passphrase).toWIF());
+          self.log("Address - public :",arkjs.crypto.getAddress(arkjs.crypto.getKeys(passphrase).publicKey));
 
           for(var killid in cps){
             cps[killid].kill();
@@ -718,7 +695,7 @@ vorpal
           spinner.text="passphrases tested: "+count;
         }
       });
-      cp.send({string:args.string.toLowerCase()});
+      cp.send({string:args.string.toLowerCase(), version:network.config.version});
     }
 
   });
@@ -735,9 +712,9 @@ vorpal
       if (result.passphrase) {
         var hash = crypto.createHash('sha256');
         hash = hash.update(new Buffer(args.message,"utf-8")).digest();
-        self.log("public key: ",require("arkjs").crypto.getKeys(result.passphrase).publicKey);
-        self.log("address   : ",require("arkjs").crypto.getAddress(require("arkjs").crypto.getKeys(result.passphrase).publicKey));
-        self.log("signature : ",require("arkjs").crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
+        self.log("public key: ",arkjs.crypto.getKeys(result.passphrase).publicKey);
+        self.log("address   : ",arkjs.crypto.getAddress(arkjs.crypto.getKeys(result.passphrase).publicKey));
+        self.log("signature : ",arkjs.crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
 
       } else {
         self.log('Aborted.');
@@ -761,8 +738,8 @@ vorpal
           hash = hash.update(new Buffer(args.message,"utf-8")).digest();
           var signature = new Buffer(result.signature, "hex");
         	var publickey= new Buffer(args.publickey, "hex");
-        	var ecpair = require("arkjs").ECPair.fromPublicKeyBuffer(publickey);
-        	var ecsignature = require("arkjs").ECSignature.fromDER(signature);
+        	var ecpair = arkjs.ECPair.fromPublicKeyBuffer(publickey);
+        	var ecsignature = arkjs.ECSignature.fromDER(signature);
         	var res = ecpair.verify(hash, ecsignature);
           self.log(res);
         }
