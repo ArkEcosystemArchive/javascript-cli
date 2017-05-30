@@ -125,7 +125,7 @@ var arkticker = {};
 var currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
 
 var networks = {
-  testnet: {
+  devnet: {
     nethash: "4befbd4cd1f2f10cbe69ac0b494b5ce070595ed23ee7abd386867c4edcdaf3bd",
     peers: [
       "5.39.9.245:4000",
@@ -501,6 +501,66 @@ vorpal
 
         callback();
       });
+    });
+  });
+
+vorpal
+  .command('account vote <name>', 'Vote for delegate <name>. Remove previous vote if needed. Leave empty to clear vote')
+  .action(function(args, callback) {
+		var self = this;
+    async.waterfall([
+      function(seriesCb){
+        self.prompt({
+          type: 'password',
+          name: 'passphrase',
+          message: 'passphrase: ',
+        }, function(result){
+          if (result.passphrase) {
+            return seriesCb(null, result.passphrase);
+          }
+          else{
+            return seriesCb("Aborted.");
+          }
+        });
+      },
+      function(passphrase, seriesCb){
+        var delegate = args.name;
+        var transaction = require("arkjs").delegates.createVote(passphrase);
+        self.prompt({
+          type: 'confirm',
+          name: 'continue',
+          default: false,
+          message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+')':'')+' to '+args.recipient+' now',
+        }, function(result){
+          if (result.continue) {
+            return seriesCb(null, transaction);
+          }
+          else {
+            return seriesCb("Aborted.")
+          }
+        });
+      },
+      function(transaction, seriesCb){
+        postTransaction(transaction, function(err, response, body){
+          if(err){
+            seriesCb("Failed to send transaction: " + err);
+          }
+          else if(body.success){
+            seriesCb(null, transaction);
+          }
+          else {
+            seriesCb("Failed to send transaction: " + body.error);
+          }
+        });
+      }
+    ], function(err, transaction){
+      if(err){
+        self.log(colors.red(err));
+      }
+      else{
+        self.log(colors.green("Transaction sent successfully with id "+transaction.id));
+      }
+      return callback();
     });
   });
 
