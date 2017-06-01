@@ -169,7 +169,7 @@ vorpal
 		var self = this;
     network = networks[args.network];
 
-      if(network==null){
+      if(!network){
           self.log("Network not found");
           return callback();
       }
@@ -444,12 +444,26 @@ vorpal
       return callback();
     }
     var currency;
-    for(var i in currencies){
-      if(args.amount.startsWith(currencies[i])){
-        currency=currencies[i];
-        args.amount = Number(args.amount.replace(currency,""));
-        getARKTicker(currency);
-        break;
+    var found = false;
+
+    if(typeof args.amount != "number")
+    {
+
+      for(var i in currencies)
+      {
+        if(args.amount.startsWith(currencies[i]))
+        {
+          currency=currencies[i];
+          args.amount = Number(args.amount.replace(currency,""));
+          getARKTicker(currency);
+          break;
+        }
+      }
+
+      if(!found)
+      {
+        self.log("Invalid Currency Format");
+        return callback();
       }
     }
 
