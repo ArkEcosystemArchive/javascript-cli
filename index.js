@@ -169,7 +169,7 @@ vorpal
 		var self = this;
     network = networks[args.network];
 
-      if(network==null){
+      if(!network){
           self.log("Network not found");
           return callback();
       }
@@ -401,7 +401,7 @@ vorpal
           type: 'confirm',
           name: 'continue',
           default: false,
-          message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+')':'')+' to '+args.recipient+' now',
+          message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
         }, function(result){
           if (result.continue) {
             return seriesCb(null, transaction);
@@ -444,12 +444,27 @@ vorpal
       return callback();
     }
     var currency;
-    for(var i in currencies){
-      if(args.amount.startsWith(currencies[i])){
-        currency=currencies[i];
-        args.amount = Number(args.amount.replace(currency,""));
-        getARKTicker(currency);
-        break;
+    var found = false;
+
+    if(typeof args.amount != "number")
+    {
+
+      for(var i in currencies)
+      {
+        if(args.amount.startsWith(currencies[i]))
+        {
+          currency=currencies[i];
+          args.amount = Number(args.amount.replace(currency,""));
+          getARKTicker(currency);
+          found = true;
+          break;
+        }
+      }
+
+      if(!found)
+      {
+        self.log("Invalid Currency Format");
+        return callback();
       }
     }
 
@@ -470,18 +485,23 @@ vorpal
       },
       function(passphrase, seriesCb){
         var arkamount = args.amount;
+        var arkAmountString = args.amount;
+
         if(currency){
           if(!arkticker[currency]){
             return seriesCb("Can't get price from market. Aborted.");
           }
           arkamount = parseInt(args.amount * 100000000 / Number(arkticker[currency]["price_"+currency.toLowerCase()]))
+          arkAmountString = arkamount/100000000;
         }
+
         var transaction = arkjs.transaction.createTransaction(args.recipient, arkamount, null, passphrase);
+
         self.prompt({
           type: 'confirm',
           name: 'continue',
           default: false,
-          message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+')':'')+' to '+args.recipient+' now',
+          message: 'Sending '+arkAmountString+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
         }, function(result){
           if (result.continue) {
             return seriesCb(null, transaction);
