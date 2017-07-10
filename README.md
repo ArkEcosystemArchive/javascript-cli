@@ -7,7 +7,7 @@ Featuring:
 - get stats of network
 - create or get status of account
 - create vanity accounts (multi-cpu supported)
-- send amount in USD, EUR or other FIAT currency at the market price (ARK only)
+- send amount in USD, EUR or other FIAT currency at the market price (BPL only)
 - create delegate, vote for delegate
 - sign and verify message using your address.
 
