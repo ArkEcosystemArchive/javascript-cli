@@ -1,5 +1,5 @@
-# ark-client
-CLI client for ark blockchain.
+# bpl-client
+CLI client for bpl blockchain.
 You can connect to devnet, mainnet or your custom private/public ark-derived blockchain
 
 Featuring:
@@ -14,20 +14,21 @@ Featuring:
 # Installation
 You need to have node installed. Then
 ```
-$> npm install -g arkecosystem/ark-client#master
-$> ark-client
-    ___         __      _________            __
-   /   |  _____/ /__   / ____/ (_)__  ____  / /_
-  / /| | / ___/ //_/  / /   / / / _ \/ __ \/ __/
- / ___ |/ /  / ,<    / /___/ / /  __/ / / / /_  
-/_/  |_/_/  /_/|_|   \____/_/_/\___/_/ /_/\__/  
-
-ark>
+$> npm install -g bplecosystem/bpl-client#master
+$> bpl-client
+  ____  _____  _      
+ |  _ \|  __ \| |     
+ | |_) | |__) | |     
+ |  _ <|  ___/| |     
+ | |_) | |    | |____ 
+ |____/|_|    |______|
+                      
+bpl>
 ```
 
 # Usage
 ```
-ark> help
+bpl> help
 
   Commands:
 
@@ -39,44 +40,44 @@ ark> help
     network stats                         Get stats from network
     account status <address>              Get account status
     account vote <name>                   Vote for delegate <name>. Remove previous vote if needed. Leave empty to clear vote
-    account send <amount> <recipient>     Send <amount> ark to <recipient>. <amount> format examples: 10, USD10.4, EUR100
+    account send <amount> <recipient>     Send <amount> bpl to <recipient>. <amount> format examples: 10, USD10.4, EUR100
     account delegate <username>           Register new delegate with <username>
     account create                        Generate a new random cold account
     account vanity <string>               Generate an address containing lowercased <string> (WARNING you could wait for long)
     message sign <message>                Sign a message
     message verify <message> <publickey>  Verify the <message> signed by the owner of <publickey> (you will be prompted to provide the signature)
-    shARK                                 No you don't want to use this command
+    shBPL                                 No you don't want to use this command
 ```
 
 
 
 ```
-ark> connect devnet
+bpl> connect devnet
 Node: 5.39.9.246:4002, height: 21078
-ark devnet>
+bpl devnet>
 ```
 
 ```
-ark devnet> account create
+bpl devnet> account create
 Seed    - private: rely cup brand sentence wolf amateur clog knock execute avocado they ready
 WIF     - private: SBHAcXWeCEBDaLVUm4B3idHoLde2qrmi2gkxz8KXtNYfjVMK16pH
 Address - public : DMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH
 ```
 
 ```
-ark devnet> account send 100 AMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH
+bpl devnet> account send 100 AMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH
 passphrase: ************************************************************************
 Transaction sent successfully with id 7adbf890c88dd345eacbac63e94610fa5f3905528cdc1c36740c3ba3fa3db302
 ```
 
 ```
-ark devnet> account delegate rockingark
+bpl devnet> account delegate rockingark
 passphrase: **************************************************************************
 Transaction sent successfully with id b857f302611e4f36a33ea886f7bcb951633406ba1f5e40393893234a46ce54eb
 ```
 
 ```
-ark devnet> account status DMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH
+bpl devnet> account status DMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH
 { address: 'DMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH',
   unconfirmedBalance: '7500000000',
   balance: '7500000000',
