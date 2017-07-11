@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var arkjs = require("arkjs");
+var bpljs = require("bpljs");
 var crypto = require("crypto");
 var figlet = require("figlet");
 var colors = require("colors");
@@ -20,7 +20,7 @@ var contrib = require('blessed-contrib');
 
 var server;
 var network;
-var arkticker = {};
+var bplticker = {};
 var currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
 
 var networks = {
@@ -157,9 +157,9 @@ function getFromNode(url, cb){
   );
 }
 
-function getARKTicker(currency){
+function getBPLTicker(currency){
   request({url: "https://api.coinmarketcap.com/v1/ticker/ark/?convert="+currency}, function(err, response, body){
-    arkticker[currency]=JSON.parse(body)[0];
+    bplticker[currency]=JSON.parse(body)[0];
   });
 }
 
@@ -187,7 +187,7 @@ vorpal
     });
     getFromNode('http://'+server+'/peer/status', function(err, response, body){
       self.log("Node: " + server + ", height: " + JSON.parse(body).height);
-      self.delimiter('ark '+args.network+'>');
+      self.delimiter('bpl '+args.network+'>');
       callback();
     });
   });
@@ -202,7 +202,7 @@ vorpal
       if(err){
         self.log(colors.red("Public API unreacheable on this server "+server+" - "+err));
         server=null;
-        self.delimiter('ark>');
+        self.delimiter('bpl>');
         return callback();
       }
       try {
@@ -212,7 +212,7 @@ vorpal
         self.log(colors.red("API is not returning expected result:"));
         self.log(body);
         server=null;
-        self.delimiter('ark>');
+        self.delimiter('bpl>');
         return callback();
       }
 
@@ -230,7 +230,7 @@ vorpal
         console.log(network.config);
       });
       self.log("Connected to network " + nethash + colors.green(" ("+networkname+")"));
-      self.delimiter('ark '+server+'>');
+      self.delimiter('bpl '+server+'>');
       getFromNode('http://'+server+'/peer/status', function(err, response, body){
         self.log("Node height ", JSON.parse(body).height);
       });
@@ -243,7 +243,7 @@ vorpal
   .action(function(args, callback) {
 		var self = this;
     self.log("Disconnected from "+server);
-    self.delimiter('ark>');
+    self.delimiter('bpl>');
     server=null;
     network=null;
     callback();
@@ -267,7 +267,7 @@ vorpal
           return peer.ip+":"+peer.port;
         });
         self.log("Checking "+peers.length+" peers");
-        var spinner = ora({text:"0%",spinner:"shark"}).start();
+        var spinner = ora({text:"0%",spinner:"shbpl"}).start();
         var heights={};
         var delays={};
         var count=0;
@@ -396,12 +396,12 @@ vorpal
       },
       function(passphrase, seriesCb){
         var delegate = args.name;
-        var transaction = arkjs.delegates.createVote(passphrase);
+        var transaction = bpljs.delegates.createVote(passphrase);
         self.prompt({
           type: 'confirm',
           name: 'continue',
           default: false,
-          message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
+          message: 'Sending '+ambplount/100000000+'BPL '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
         }, function(result){
           if (result.continue) {
             return seriesCb(null, transaction);
@@ -436,7 +436,7 @@ vorpal
   });
 
 vorpal
-  .command('account send <amount> <recipient>', 'Send <amount> ark to <recipient>. <amount> format examples: 10, USD10.4, EUR100')
+  .command('account send <amount> <recipient>', 'Send <amount> bpl to <recipient>. <amount> format examples: 10, USD10.4, EUR100')
   .action(function(args, callback) {
 		var self = this;
     if(!server){
@@ -455,7 +455,7 @@ vorpal
         {
           currency=currencies[i];
           args.amount = Number(args.amount.replace(currency,""));
-          getARKTicker(currency);
+          getBPLTicker(currency);
           found = true;
           break;
         }
@@ -484,24 +484,24 @@ vorpal
         });
       },
       function(passphrase, seriesCb){
-        var arkamount = args.amount;
-        var arkAmountString = args.amount;
+        var bplamount = args.amount;
+        var bplAmountString = args.amount;
 
         if(currency){
-          if(!arkticker[currency]){
+          if(!bplticker[currency]){
             return seriesCb("Can't get price from market. Aborted.");
           }
-          arkamount = parseInt(args.amount * 100000000 / Number(arkticker[currency]["price_"+currency.toLowerCase()]))
-          arkAmountString = arkamount/100000000;
+          bplamount = parseInt(args.amount * 100000000 / Number(bplticker[currency]["price_"+currency.toLowerCase()]))
+          bplAmountString = bplamount/100000000;
         }
 
-        var transaction = arkjs.transaction.createTransaction(args.recipient, arkamount, null, passphrase);
+        var transaction = bpljs.transaction.createTransaction(args.recipient, bplamount, null, passphrase);
 
         self.prompt({
           type: 'confirm',
           name: 'continue',
           default: false,
-          message: 'Sending '+arkAmountString+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
+          message: 'Sending '+bplAmountString+'BPL '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
         }, function(result){
           if (result.continue) {
             return seriesCb(null, transaction);
@@ -549,7 +549,7 @@ vorpal
       message: 'passphrase: ',
     }, function(result){
       if (result.passphrase) {
-        var transaction = arkjs.delegate.createDelegate(result.passphrase, args.username);
+        var transaction = bpljs.delegate.createDelegate(result.passphrase, args.username);
         postTransaction(transaction, function(err, response, body){
           if(body.success){
             self.log(colors.green("Transaction sent successfully with id "+body.transactionIds[0]));
@@ -575,11 +575,11 @@ vorpal
       self.log("please connect to node or network before, in order to retrieve necessery information about address prefixing");
       return callback();
     }
-    arkjs.crypto.setNetworkVersion(network.config.version);
+    bpljs.crypto.setNetworkVersion(network.config.version);
     var passphrase = require("bip39").generateMnemonic();
 		self.log("Seed    - private:",passphrase);
-		self.log("WIF     - private:",arkjs.crypto.getKeys(passphrase).toWIF());
-		self.log("Address - public :",arkjs.crypto.getAddress(arkjs.crypto.getKeys(passphrase).publicKey));
+		self.log("WIF     - private:",bpljs.crypto.getKeys(passphrase).toWIF());
+		self.log("Address - public :",bpljs.crypto.getAddress(bpljs.crypto.getKeys(passphrase).publicKey));
 		callback();
   });
 
@@ -592,12 +592,12 @@ vorpal
       return callback();
     }
 
-    arkjs.crypto.setNetworkVersion(network.config.version);
+    bpljs.crypto.setNetworkVersion(network.config.version);
     var count=0;
     var numCPUs = require('os').cpus().length;
     var cps=[];
     self.log("Spawning process to "+numCPUs+" cpus");
-    var spinner = ora({text:"passphrases tested: 0",spinner:"shark"}).start();
+    var spinner = ora({text:"passphrases tested: 0",spinner:"shbpl"}).start();
     for (var i = 0; i < numCPUs; i++) {
       var cp=child_process.fork(__dirname+"/vanity.js");
       cps.push(cp);
@@ -607,8 +607,8 @@ vorpal
           var passphrase = message.passphrase;
           self.log("Found after",count,"passphrases tested");
           self.log("Seed    - private:",passphrase);
-          self.log("WIF     - private:",arkjs.crypto.getKeys(passphrase).toWIF());
-          self.log("Address - public :",arkjs.crypto.getAddress(arkjs.crypto.getKeys(passphrase).publicKey));
+          self.log("WIF     - private:",bpljs.crypto.getKeys(passphrase).toWIF());
+          self.log("Address - public :",bpljs.crypto.getAddress(bpljs.crypto.getKeys(passphrase).publicKey));
 
           for(var killid in cps){
             cps[killid].kill();
@@ -637,9 +637,9 @@ vorpal
       if (result.passphrase) {
         var hash = crypto.createHash('sha256');
         hash = hash.update(new Buffer(args.message,"utf-8")).digest();
-        self.log("public key: ",arkjs.crypto.getKeys(result.passphrase).publicKey);
-        self.log("address   : ",arkjs.crypto.getAddress(arkjs.crypto.getKeys(result.passphrase).publicKey));
-        self.log("signature : ",arkjs.crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
+        self.log("public key: ",bpljs.crypto.getKeys(result.passphrase).publicKey);
+        self.log("address   : ",bpljs.crypto.getAddress(bpljs.crypto.getKeys(result.passphrase).publicKey));
+        self.log("signature : ",bpljs.crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
 
       } else {
         self.log('Aborted.');
@@ -663,8 +663,8 @@ vorpal
           hash = hash.update(new Buffer(args.message,"utf-8")).digest();
           var signature = new Buffer(result.signature, "hex");
         	var publickey= new Buffer(args.publickey, "hex");
-        	var ecpair = arkjs.ECPair.fromPublicKeyBuffer(publickey);
-        	var ecsignature = arkjs.ECSignature.fromDER(signature);
+        	var ecpair = bpljs.ECPair.fromPublicKeyBuffer(publickey);
+        	var ecsignature = bpljs.ECSignature.fromDER(signature);
         	var res = ecpair.verify(hash, ecsignature);
           self.log(res);
         }
@@ -679,36 +679,36 @@ vorpal
     });
 
   });
-var sharkspinner;
+var shbplspinner;
 vorpal
-  .command("shARK", "No you don't want to use this command")
+  .command("shBPL", "No you don't want to use this command")
   .action(function(args, callback) {
 		var self = this;
-    self.log(colors.red(figlet.textSync("shARK")));
-    sharkspinner = ora({text:"Watch out, the shARK attack!",spinner:"shark"}).start();
+    self.log(colors.red(figlet.textSync("shBPL")));
+    shbplspinner = ora({text:"Watch out, the shBPL attack!",spinner:"shbpl"}).start();
     callback();
   });
 
 vorpal
-  .command("spARKaaaaa!")
+  .command("spBPLaaaaa!")
   .hidden()
   .action(function(args, callback) {
     var time = 0;
     var self=this;
-    sharkspinner && sharkspinner.stop();
-    ["tux","meow","bunny","cower","dragon-and-cow"].forEach(function(spark){
+    shbplspinner && shbplspinner.stop();
+    ["tux","meow","bunny","cower","dragon-and-cow"].forEach(function(spbpl){
       setTimeout(function(){
-        self.log(cowsay.say({text:"SPAAAAARKKKAAAAAAA!", f:spark}));
+        self.log(cowsay.say({text:"SPAAAABPLLLLLL!", f:spbpl}));
   		}, time++*1000);
     });
 
     callback();
   });
 
-vorpal.history('ark-client');
+vorpal.history('bpl-client');
 
-vorpal.log(colors.cyan(figlet.textSync("Ark Client","Slant")));
+vorpal.log(colors.cyan(figlet.textSync("Bpl Client","Slant")));
 
 vorpal
-  .delimiter('ark>')
+  .delimiter('bpl>')
   .show();

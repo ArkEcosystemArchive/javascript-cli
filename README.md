@@ -1,6 +1,6 @@
 # bpl-client
 CLI client for bpl blockchain.
-You can connect to devnet, mainnet or your custom private/public ark-derived blockchain
+You can connect to devnet, mainnet or your custom private/public bpl-derived blockchain
 
 Featuring:
 - connection to network or a node
@@ -92,7 +92,7 @@ bpl devnet> account status DMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH
 ```
 
 # License
-Copyright © 2017 ARK.io | Copyright © 2017 FX Thoorens
+Copyright © 2017 blockpool.io | Copyright © 2017 FX Thoorens
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
