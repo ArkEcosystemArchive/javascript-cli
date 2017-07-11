@@ -1,28 +1,29 @@
 {
-  "name": "ark-client",
+  "name": "bpl-client",
   "version": "1.0.0",
-  "description": "Command Line Interface to Ark blockchain",
+  "description": "Command Line Interface to Bpl blockchain",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
-    "url": "https:/:github.com/arkecosystem/ark-client.git"
+    "url": "https://github.com/blockpool-io/bpl-client.git"
   },
   "keywords": [
-    "ark",
+    "bpl",
     "blockchain",
     "spv",
     "lite",
     "cli"
   ],
   "bin": {
-    "ark-client": "index.js"
+    "bpl-client": "index.js"
   },
   "author": "fx.thoorens@ark.io",
   "license": "MIT",
   "dependencies": {
+    "bpljs": "github:blockpool-io/BPL-js#testnet",
     "arkjs": "github:arkecosystem/ark-js#master",
     "ascii-table": "0.0.9",
     "asciichart": "^0.1.7",
