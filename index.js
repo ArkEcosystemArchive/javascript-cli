@@ -396,7 +396,7 @@ vorpal
       },
       function(passphrase, seriesCb){
         var delegate = args.name;
-        var transaction = arkjs.delegates.createVote(passphrase);
+        var transaction = arkjs.delegate.createVote(passphrase);
         self.prompt({
           type: 'confirm',
           name: 'continue',
