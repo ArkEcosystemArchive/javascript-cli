@@ -378,7 +378,11 @@ vorpal
 vorpal
   .command('account vote <name>', 'Vote for delegate <name>. Remove previous vote if needed. Leave empty to clear vote')
   .action(function(args, callback) {
-		var self = this;
+    var self = this;
+    if(!server){
+      self.log("please connect to node or network before");
+      return callback();
+    }
     async.waterfall([
       function(seriesCb){
         self.prompt({
