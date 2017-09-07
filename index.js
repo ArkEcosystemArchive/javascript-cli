@@ -412,11 +412,12 @@ vorpal
             }, function(result){
               if (result.continue) {
                 return seriesCb(null, transaction);
-              }
-              else {
+              } else {
                 return seriesCb("Aborted.")
               }
             });
+          } else {
+            return seriesCb("Failed: " + body.error);
           }
         });
       },
