@@ -396,18 +396,23 @@ vorpal
       },
       function(passphrase, seriesCb){
         var delegate = args.name;
-        var transaction = arkjs.delegate.createVote(passphrase);
-        self.prompt({
-          type: 'confirm',
-          name: 'continue',
-          default: false,
-          message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
-        }, function(result){
-          if (result.continue) {
-            return seriesCb(null, transaction);
-          }
-          else {
-            return seriesCb("Aborted.")
+        getFromNode('http://'+server+'/api/delegates/get/?username='+delegate, function(err, response, body){
+          var body = JSON.parse(body);
+          if(body.success){
+            var transaction = arkjs.delegate.createVote(passphrase, body.delegate.publicKey);
+            self.prompt({
+              type: 'confirm',
+              name: 'continue',
+              default: false,
+              message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
+            }, function(result){
+              if (result.continue) {
+                return seriesCb(null, transaction);
+              }
+              else {
+                return seriesCb("Aborted.")
+              }
+            });
           }
         });
       },
