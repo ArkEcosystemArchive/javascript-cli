@@ -403,7 +403,7 @@ vorpal
         getFromNode('http://'+server+'/api/delegates/get/?username='+delegate, function(err, response, body){
           var body = JSON.parse(body);
           if(body.success){
-            var transaction = arkjs.delegate.createVote(passphrase, body.delegate.publicKey);
+            var transaction = arkjs.vote.createVote(passphrase, ['+'+body.delegate.publicKey]);
             self.prompt({
               type: 'confirm',
               name: 'continue',
