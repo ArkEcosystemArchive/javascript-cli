@@ -408,7 +408,7 @@ vorpal
               type: 'confirm',
               name: 'continue',
               default: false,
-              message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
+              message: 'Voting for ' + delegate + ' (' + body.delegate.publicKey + ') now',
             }, function(result){
               if (result.continue) {
                 return seriesCb(null, transaction);
