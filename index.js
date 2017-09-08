@@ -400,9 +400,38 @@ vorpal
       },
       function(passphrase, seriesCb){
         var delegate = args.name;
-        getFromNode('http://'+server+'/api/delegates/get/?username='+delegate, function(err, response, body){
-          var body = JSON.parse(body);
-          if(body.success){
+        if (args.name === undefined) {
+          var keys = arkjs.crypto.getKeys(passphrase);
+          var address = arkjs.crypto.getAddress(keys.publicKey);
+          getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
+            body = JSON.parse(body);
+            if (!body.success) {
+              return seriesCb("Failed: " + body.error);
+            }
+            if (!body.delegates.length) {
+              return seriesCb("You currently haven't voted for anyone.");
+            }
+            var delegates = ['-' + body.delegates.pop().publicKey];
+            self.prompt({
+              type: 'confirm',
+              name: 'continue',
+              default: false,
+              message: 'Removing last vote',
+            }, function(result){
+              if (result.continue) {
+                var transaction = arkjs.vote.createVote(passphrase, delegates);
+                return seriesCb(null, transaction);
+              } else {
+                return seriesCb("Aborted.");
+              }
+            });
+          });
+        } else {
+          getFromNode('http://'+server+'/api/delegates/get/?username='+delegate, function(err, response, body){
+            var body = JSON.parse(body);
+            if (!body.success) {
+              return seriesCb("Failed: " + body.error);
+            }
             var transaction = arkjs.vote.createVote(passphrase, ['+'+body.delegate.publicKey]);
             self.prompt({
               type: 'confirm',
@@ -416,10 +445,8 @@ vorpal
                 return seriesCb("Aborted.")
               }
             });
-          } else {
-            return seriesCb("Failed: " + body.error);
-          }
-        });
+          });
+        }
       },
       function(transaction, seriesCb){
         postTransaction(transaction, function(err, response, body){
