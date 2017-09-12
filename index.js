@@ -15,6 +15,9 @@ var vorpal = require('vorpal')();
 var cluster = require('cluster');
 var child_process = require('child_process');
 
+var ledger = require('ledgerco')
+var LedgerArk = require('./src/LedgerArk.js');
+
 var blessed = require('blessed');
 var contrib = require('blessed-contrib');
 
@@ -22,6 +25,8 @@ var server;
 var network;
 var arkticker = {};
 var currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
+
+var ledgerComm = null;
 
 var networks = {
   devnet: {
@@ -162,6 +167,21 @@ function getARKTicker(currency){
     arkticker[currency]=JSON.parse(body)[0];
   });
 }
+
+setInterval(()=>{
+  ledger.comm_node.list_async().then((deviceList) => {
+    if(deviceList.length > 0 && !ledgercomm){
+      ledger.comm_node.create_async().then((comm) => {
+        ledgercomm = comm
+      }).fail((error) => {
+        console.log('ledger error: ', error);
+      })
+    }
+    else if(deviceList.length == 0){
+      ledgercomm = null
+    }
+  })
+}, 1000);
 
 vorpal
   .command('connect <network>', 'Connect to network. Network is devnet or mainnet')

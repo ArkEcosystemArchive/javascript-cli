@@ -38,6 +38,7 @@
     "cowsay": "^1.1.9",
     "figlet": "^1.2.0",
     "le-table": "^6.1.4",
+    "ledgerco": "github:ledgerhq/ledger-node-js-api#master",
     "ora": "^1.1.0",
     "request": "^2.79.0",
     "vorpal": "^1.11.4"
