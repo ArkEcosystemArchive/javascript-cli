@@ -400,7 +400,7 @@ vorpal
       },
       function(passphrase, seriesCb){
         var delegateName = args.name;
-        arkjs.crypto.setNetworkVersion(30);
+        arkjs.crypto.setNetworkVersion(network.config.version);
         var keys = arkjs.crypto.getKeys(passphrase);
         var address = arkjs.crypto.getAddress(keys.publicKey);
         getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
@@ -515,7 +515,7 @@ vorpal
         });
       },
       function(passphrase, seriesCb){
-        arkjs.crypto.setNetworkVersion(30);
+        arkjs.crypto.setNetworkVersion(network.config.version);
         var keys = arkjs.crypto.getKeys(passphrase);
         var address = arkjs.crypto.getAddress(keys.publicKey);
         getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
