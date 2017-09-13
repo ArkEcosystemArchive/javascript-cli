@@ -376,7 +376,7 @@ vorpal
   });
 
 vorpal
-  .command('account vote <name>', 'Vote for delegate <name>. Remove previous vote if needed. Leave empty to clear vote')
+  .command('account vote <name>', 'Vote for delegate <name>. Remove previous vote if needed')
   .action(function(args, callback) {
     var self = this;
     if(!server){
