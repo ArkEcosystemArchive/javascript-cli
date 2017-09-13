@@ -385,16 +385,22 @@ vorpal
     }
     async.waterfall([
       function(seriesCb){
-        self.prompt({
-          type: 'password',
-          name: 'passphrase',
-          message: 'passphrase: ',
-        }, function(result){
-          if (result.passphrase) {
-            return seriesCb(null, result.passphrase);
-          }
-          else{
-            return seriesCb("Aborted.");
+        getFromNode('http://'+server+'/api/transactions/unconfirmed/?type=3', function(err, response, body) {
+          if (body.transactions && body.transactions.length) {
+            return seriesCb('You have ' + body.transactions.length + ' pending vote transactions.');
+          } else {
+            self.prompt({
+              type: 'password',
+              name: 'passphrase',
+              message: 'passphrase: ',
+            }, function(result){
+              if (result.passphrase) {
+                return seriesCb(null, result.passphrase);
+              }
+              else{
+                return seriesCb("Aborted.");
+              }
+            });
           }
         });
       },
@@ -501,16 +507,22 @@ vorpal
     }
     async.waterfall([
       function(seriesCb){
-        self.prompt({
-          type: 'password',
-          name: 'passphrase',
-          message: 'passphrase: ',
-        }, function(result){
-          if (result.passphrase) {
-            return seriesCb(null, result.passphrase);
-          }
-          else{
-            return seriesCb("Aborted.");
+        getFromNode('http://'+server+'/api/transactions/unconfirmed/?type=3', function(err, response, body) {
+          if (body.transactions && body.transactions.length) {
+            return seriesCb('You have ' + body.transactions.length + ' pending vote transactions.');
+          } else {
+            self.prompt({
+              type: 'password',
+              name: 'passphrase',
+              message: 'passphrase: ',
+            }, function(result){
+              if (result.passphrase) {
+                return seriesCb(null, result.passphrase);
+              }
+              else{
+                return seriesCb("Aborted.");
+              }
+            });
           }
         });
       },
