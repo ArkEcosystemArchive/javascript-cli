@@ -441,7 +441,7 @@ vorpal
                       return seriesCb("Failed to send transaction: " + body.error);
                     }
                     var transactionId = body.transactionIds.pop();
-                    console.log('Waiting for transaction ' + transactionId + ' to confirm.');
+                    console.log('Waiting for unvote transaction (' + transactionId + ') to confirm.');
                     var checkTransactionTimerId = setInterval(function() {
                       getFromNode('http://' + server + '/api/transactions/get?id=' + transactionId, function(err, response, body) {
                         var body = JSON.parse(body);
