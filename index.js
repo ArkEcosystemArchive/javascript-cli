@@ -26,7 +26,9 @@ var network;
 var arkticker = {};
 var currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
 
-var ledgerComm = null;
+var legderAccounts = [];
+var ledgerBridge = null;
+var ledgerComm   = null;
 
 var networks = {
   devnet: {
@@ -168,19 +170,52 @@ function getARKTicker(currency){
   });
 }
 
+function populateLedgerAccounts() {
+  if (!ledgerBridge) {
+    return;
+  }
+  ledgerAccounts = [];
+  var accounts = [];
+  var account_index = 0;
+  var path = "44'/111'/";
+  var empty = false;
+
+  while (!empty) {
+    var localpath = path + account_index + "'/0/0";
+    var result = ledgerBridge.getAddress_async(localpath).then(function(ledgerResult) {
+      return ledgerResult;
+    });
+console.log(localpath, (result ? result.address : null));
+    if (result.address) {
+      ledgerAccounts.push({
+        account: result,
+        path: localpath,
+      });
+      account_index = account_index + 1;
+    } else {
+      empty = true;
+    }
+  }
+}
+
 setInterval(()=>{
   ledger.comm_node.list_async().then((deviceList) => {
-    if(deviceList.length > 0 && !ledgercomm){
+    if (deviceList.length > 0 && !ledgerComm){
       ledger.comm_node.create_async().then((comm) => {
-        ledgercomm = comm
+        ledgerComm = comm;
+        ledgerBridge = new LedgerArk(ledgerComm);
+        populateLedgerAccounts();
       }).fail((error) => {
         console.log('ledger error: ', error);
-      })
+      });
+    } else if (deviceList.length == 0){
+      ledgerComm = null;
+      ledgerBridge = null;
     }
-    else if(deviceList.length == 0){
-      ledgercomm = null
-    }
-  })
+  }).fail(() => {
+    ledgerComm = null;
+    ledgerBridge = null;
+  });
 }, 1000);
 
 vorpal
