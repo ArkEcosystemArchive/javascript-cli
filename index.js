@@ -376,9 +376,13 @@ vorpal
   });
 
 vorpal
-  .command('account vote <name>', 'Vote for delegate <name>. Remove previous vote if needed. Leave empty to clear vote')
+  .command('account vote <name>', 'Vote for delegate <name>. Remove previous vote if needed')
   .action(function(args, callback) {
-		var self = this;
+    var self = this;
+    if(!server){
+      self.log("please connect to node or network before");
+      return callback();
+    }
     async.waterfall([
       function(seriesCb){
         self.prompt({
@@ -395,20 +399,148 @@ vorpal
         });
       },
       function(passphrase, seriesCb){
-        var delegate = args.name;
-        var transaction = arkjs.delegates.createVote(passphrase);
-        self.prompt({
-          type: 'confirm',
-          name: 'continue',
-          default: false,
-          message: 'Sending '+arkamount/100000000+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
-        }, function(result){
-          if (result.continue) {
-            return seriesCb(null, transaction);
+        var delegateName = args.name;
+        arkjs.crypto.setNetworkVersion(network.config.version);
+        var keys = arkjs.crypto.getKeys(passphrase);
+        var address = arkjs.crypto.getAddress(keys.publicKey);
+        getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
+          body = JSON.parse(body);
+          if (!body.success) {
+            return seriesCb("Failed getting current vote: " + body.error);
+          }
+          var currentVote = null;
+          if (body.delegates.length) {
+            currentVote = body.delegates.pop();
+            if (currentVote.username === delegateName) {
+              return seriesCb('You have already voted for ' + delegateName);
+            }
+          }
+          getFromNode('http://'+server+'/api/delegates/get/?username='+delegateName, function(err, response, body){
+            var body = JSON.parse(body);
+            if (!body.success) {
+              return seriesCb("Failed: " + body.error);
+            }
+            var newDelegate = body.delegate;
+            var confirmMessage = 'Vote for ' + delegateName + ' now';
+            if (currentVote) {
+              confirmMessage = 'Vote for ' + delegateName + ' and unvote ' + currentVote.username + ' now';
+            }
+            self.prompt({
+              type: 'confirm',
+              name: 'continue',
+              default: false,
+              message: confirmMessage,
+            }, function(result){
+              if (result.continue) {
+                if (currentVote) {
+                  var unvoteTransaction = arkjs.vote.createVote(passphrase, ['-'+currentVote.publicKey]);
+                  postTransaction(unvoteTransaction, function(err, response, body) {
+                    if (err) {
+                      return seriesCb('Failed to unvote previous delegate: ' + err);
+                    } else if (!body.success){
+                      return seriesCb("Failed to send transaction: " + body.error);
+                    }
+                    var transactionId = body.transactionIds.pop();
+                    console.log('Waiting for unvote transaction (' + transactionId + ') to confirm.');
+                    var checkTransactionTimerId = setInterval(function() {
+                      getFromNode('http://' + server + '/api/transactions/get?id=' + transactionId, function(err, response, body) {
+                        var body = JSON.parse(body);
+                        if (!body.success && body.error !== 'Transaction not found') {
+                          clearInterval(checkTransactionTimerId);
+                          return seriesCb('Failed to fetch unconfirmed transaction: ' + body.error);
+                        } else if (body.transaction) {
+                          clearInterval(checkTransactionTimerId);
+                          var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                          return seriesCb(null, transaction);
+                        }
+                      });
+                    }, 2000);
+                  });
+                } else {
+                  var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                  return seriesCb(null, transaction);
+                }
+              } else {
+                return seriesCb("Aborted.")
+              }
+            });
+          });
+        });
+      },
+      function(transaction, seriesCb){
+        postTransaction(transaction, function(err, response, body){
+          if(err){
+            seriesCb("Failed to send transaction: " + err);
+          }
+          else if(body.success){
+            seriesCb(null, transaction);
           }
           else {
-            return seriesCb("Aborted.")
+            seriesCb("Failed to send transaction: " + body.error);
           }
+        });
+      }
+    ], function(err, transaction){
+      if(err){
+        self.log(colors.red(err));
+      }
+      else{
+        self.log(colors.green("Transaction sent successfully with id "+transaction.id));
+      }
+      return callback();
+    });
+  });
+
+vorpal
+  .command('account unvote', 'Remove previous vote')
+  .action(function(args, callback) {
+    var self = this;
+    if(!server){
+      self.log("please connect to node or network before");
+      return callback();
+    }
+    async.waterfall([
+      function(seriesCb){
+        self.prompt({
+          type: 'password',
+          name: 'passphrase',
+          message: 'passphrase: ',
+        }, function(result){
+          if (result.passphrase) {
+            return seriesCb(null, result.passphrase);
+          }
+          else{
+            return seriesCb("Aborted.");
+          }
+        });
+      },
+      function(passphrase, seriesCb){
+        arkjs.crypto.setNetworkVersion(network.config.version);
+        var keys = arkjs.crypto.getKeys(passphrase);
+        var address = arkjs.crypto.getAddress(keys.publicKey);
+        getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
+          body = JSON.parse(body);
+          if (!body.success) {
+            return seriesCb("Failed: " + body.error);
+          }
+          if (!body.delegates.length) {
+            return seriesCb("You currently haven't voted for anyone.");
+          }
+          var lastDelegate = body.delegates.pop();
+          var delegates = ['-' + lastDelegate.publicKey];
+          self.prompt({
+            type: 'confirm',
+            name: 'continue',
+            default: false,
+            message: 'Removing last vote for ' + lastDelegate.username,
+          }, function(result){
+            if (result.continue) {
+              var transaction = arkjs.vote.createVote(passphrase, delegates);
+              return seriesCb(null, transaction);
+            } else {
+              return seriesCb("Aborted.");
+            }
+          });
         });
       },
       function(transaction, seriesCb){
