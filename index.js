@@ -124,9 +124,9 @@ function findEnabledPeers(cb){
   });
 }
 
-function postTransaction(transaction, cb){
-  request(
-    {
+function postTransaction(container, transaction, cb){
+  var performPost = function() {
+    request({
       url: 'http://'+server+'/peer/transactions',
       headers: {
         nethash: network.nethash,
@@ -136,9 +136,34 @@ function postTransaction(transaction, cb){
       method: 'POST',
       json: true,
       body: {transactions:[transaction]}
-    },
-    cb
-  );
+    }, cb);
+  };
+  container.prompt({
+    type: 'confirm',
+    name: 'continue',
+    default: false,
+    message: 'Do you have a second passphrase?',
+  }, function(result) {
+    if (result.continue) {
+      container.prompt({
+        type: 'password',
+        name: 'passphrase',
+        message: 'Second passphrase: ',
+      }, function(result) {
+        if (result.passphrase) {
+          var secondKeys = arkjs.crypto.getKeys(result.passphrase);
+          arkjs.crypto.secondSign(transaction, secondKeys);
+          transaction.id = arkjs.crypto.getId(transaction);
+          performPost();
+        } else {
+          console.log('No second passphrase given. Trying without.');
+          performPost();
+        }
+      });
+    } else {
+      performPost();
+    }
+  });
 }
 
 function getFromNode(url, cb){
@@ -434,7 +459,7 @@ vorpal
               if (result.continue) {
                 if (currentVote) {
                   var unvoteTransaction = arkjs.vote.createVote(passphrase, ['-'+currentVote.publicKey]);
-                  postTransaction(unvoteTransaction, function(err, response, body) {
+                  postTransaction(self, unvoteTransaction, function(err, response, body) {
                     if (err) {
                       return seriesCb('Failed to unvote previous delegate: ' + err);
                     } else if (!body.success){
@@ -468,7 +493,7 @@ vorpal
         });
       },
       function(transaction, seriesCb){
-        postTransaction(transaction, function(err, response, body){
+        postTransaction(self, transaction, function(err, response, body){
           if(err){
             seriesCb("Failed to send transaction: " + err);
           }
@@ -544,7 +569,7 @@ vorpal
         });
       },
       function(transaction, seriesCb){
-        postTransaction(transaction, function(err, response, body){
+        postTransaction(self, transaction, function(err, response, body){
           if(err){
             seriesCb("Failed to send transaction: " + err);
           }
@@ -644,7 +669,7 @@ vorpal
         });
       },
       function(transaction, seriesCb){
-        postTransaction(transaction, function(err, response, body){
+        postTransaction(self, transaction, function(err, response, body){
           if(err){
             seriesCb("Failed to send transaction: " + err);
           }
@@ -682,7 +707,7 @@ vorpal
     }, function(result){
       if (result.passphrase) {
         var transaction = arkjs.delegate.createDelegate(result.passphrase, args.username);
-        postTransaction(transaction, function(err, response, body){
+        postTransaction(self, transaction, function(err, response, body){
           if(body.success){
             self.log(colors.green("Transaction sent successfully with id "+body.transactionIds[0]));
           }
