@@ -170,7 +170,7 @@ function getARKTicker(currency){
   });
 }
 
-function populateLedgerAccounts() {
+async function populateLedgerAccounts() {
   if (!ledgerBridge) {
     return;
   }
@@ -182,15 +182,14 @@ function populateLedgerAccounts() {
 
   while (!empty) {
     var localpath = path + account_index + "'/0/0";
-    var result = ledgerBridge.getAddress_async(localpath).then(function(ledgerResult) {
-      return ledgerResult;
-    });
-console.log(localpath, (result ? result.address : null));
+    var result = null;
+    await ledgerBridge.getAddress_async(localpath).then(
+      (response) => { result = response }
+    ).fail(
+      (response) => { result = response }
+    )
     if (result.address) {
-      ledgerAccounts.push({
-        account: result,
-        path: localpath,
-      });
+      ledgerAccounts[localpath] = result;
       account_index = account_index + 1;
     } else {
       empty = true;
@@ -198,8 +197,8 @@ console.log(localpath, (result ? result.address : null));
   }
 }
 
-setInterval(()=>{
-  ledger.comm_node.list_async().then((deviceList) => {
+setInterval(async ()=>{
+  await ledger.comm_node.list_async().then((deviceList) => {
     if (deviceList.length > 0 && !ledgerComm){
       ledger.comm_node.create_async().then((comm) => {
         ledgerComm = comm;
