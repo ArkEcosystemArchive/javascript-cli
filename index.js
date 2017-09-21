@@ -256,7 +256,9 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
 
   var fromAddress = arkjs.crypto.getAddress(account.publicKey);
   transaction.senderId = fromAddress;
-  transaction.recipientId = fromAddress;
+  if (transaction.type === 3) {
+    transaction.recipientId = fromAddress;
+  }
   transaction.senderPublicKey = account.publicKey;
   delete transaction.signature;
   var transactionHex = arkjs.crypto.getBytes(transaction, true, true).toString("hex");
