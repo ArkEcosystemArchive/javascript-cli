@@ -190,7 +190,6 @@ function getAccount(container, seriesCb) {
   }
   if (ledgerAccounts.length) {
     var message = 'We have found the following Ledgers: \n';
-    console.log(ledgerAccounts);
     ledgerAccounts.forEach(function(ledger, index) {
       message += (index + 1) + ') ' + ledger.data.address + '\n';
     });
@@ -286,21 +285,17 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
   }
   transaction.senderPublicKey = account.publicKey;
   delete transaction.signature;
-  console.log('before', transaction);
   var transactionHex = arkjs.crypto.getBytes(transaction, true, true).toString("hex");
   var result = null;
-  console.log(account);
   console.log('Please sign the transaction on your Ledger');
   await ledgerBridge.signTransaction_async(account.path, transactionHex).then(
     (response) => { result = response }
   ).fail(
     (response) => { result = response }
   );
-  console.log('result', result);
   if (result.signature && result.signature !== '00000100') {
     transaction.signature = result.signature;
     transaction.id = arkjs.crypto.getId(transaction);
-    console.log('after', transaction);
   } else {
     transaction = null;
   }
