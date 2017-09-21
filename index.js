@@ -828,26 +828,53 @@ vorpal
       self.log("please connect to node or network before");
       return callback();
     }
-    return this.prompt({
-      type: 'password',
-      name: 'passphrase',
-      message: 'passphrase: ',
-    }, function(result){
-      if (result.passphrase) {
-        var transaction = arkjs.delegate.createDelegate(result.passphrase, args.username);
-        postTransaction(transaction, function(err, response, body){
-          if(body.success){
-            self.log(colors.green("Transaction sent successfully with id "+body.transactionIds[0]));
+    async.waterfall([
+      function(seriesCb) {
+        getAccount(self, seriesCb);
+      },
+      function(account, seriesCb) {
+        arkjs.crypto.setNetworkVersion(network.config.version);
+        var publicKey = null;
+        var passphrase = '';
+        if (account.passphrase) {
+          passphrase = account.passphrase;
+          var keys = arkjs.crypto.getKeys(passphrase);
+          publicKey = keys.publicKey;
+        } else if (account.publicKey) {
+          publicKey = account.publicKey;
+        } else {
+          return seriesCb('No public key for account');
+        }
+        var address = arkjs.crypto.getAddress(publicKey);
+        var transaction = arkjs.delegate.createDelegate(passphrase, args.username);
+        ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
+          if (!transaction) {
+            return seriesCb('Failed to sign transaction with ledger');
           }
-          else{
-            self.log(colors.red("Failed to send transaction: "+body.error));
-          }
-          return callback();
+          return seriesCb(null, transaction);
         });
-      } else {
-        self.log('Aborted.');
-        return callback();
+      },
+      function(transaction, seriesCb) {
+        postTransaction(transaction, function(err, response, body){
+          if(err){
+            seriesCb("Failed to send transaction: " + err);
+          }
+          else if(body.success){
+            seriesCb(null, transaction);
+          }
+          else {
+            seriesCb("Failed to send transaction: " + body.error);
+          }
+        });
       }
+    ], function(err, transaction){
+      if(err){
+        self.log(colors.red(err));
+      }
+      else{
+        self.log(colors.green("Transaction sent successfully with id "+transaction.id));
+      }
+      return callback();
     });
   });
 
