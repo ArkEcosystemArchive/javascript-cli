@@ -170,6 +170,51 @@ function getARKTicker(currency){
   });
 }
 
+function getAccount(container, seriesCb) {
+  var getPassPhrase = function() {
+    container.prompt({
+      type: 'password',
+      name: 'passphrase',
+      message: 'passphrase: ',
+    }, function(result){
+      if (result.passphrase) {
+        return seriesCb(null, {
+          passphrase: result.passphrase,
+        });
+      } else{
+        return seriesCb("Aborted.");
+      }
+    });
+  }
+  if (Object.keys(ledgerAccounts).length) {
+    var message = 'We have found the following Ledgers: \n';
+    console.log(ledgerAccounts);
+    ledgerAccounts.forEach(function(ledger, index) {
+      message += (index + 1) + ') ' + ledger.data.publicKey + '\n';
+    });
+    message += 'N) passphrase\n\n';
+    message += 'Please choose an option: ';
+    container.prompt({
+      type: 'input',
+      name: 'account',
+      message: message,
+    }, function(result){
+      if (result.account === 'N') {
+        getPassPhrase();
+      } else if (ledgerAccounts[result.account - 1]) {
+        return seriesCb(null, {
+          publicKey: ledgerAccounts[result.account - 1].data.publicKey,
+          path: ledgerAccounts[result.account - 1].path,
+        });
+      } else {
+        return seriesCb("Failed to get Accounts");
+      }
+    });
+  } else {
+    getPassPhrase();
+  }
+}
+
 async function populateLedgerAccounts() {
   if (!ledgerBridge) {
     return;
