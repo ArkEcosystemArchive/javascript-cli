@@ -808,10 +808,10 @@ vorpal
           type: 'confirm',
           name: 'continue',
           default: false,
-          message: 'Sending '+arkAmountString+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
+          message: 'Sending '+arkAmountString+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
         }, function(result){
           if (result.continue) {
-            var transaction = arkjs.transaction.createTransaction(args.recipient, arkamount, null, passphrase);
+            var transaction = arkjs.transaction.createTransaction(args.address, arkamount, null, passphrase);
             ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
               if (!transaction) {
                 return seriesCb('Failed to sign transaction with ledger');
