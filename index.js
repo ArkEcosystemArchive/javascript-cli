@@ -228,13 +228,20 @@ async function populateLedgerAccounts() {
   while (!empty) {
     var localpath = path + account_index + "'/0/0";
     var result = null;
-    await ledgerBridge.getAddress_async(localpath).then(
-      (response) => { result = response }
-    ).fail(
-      (response) => { result = response }
-    )
+    try {
+      await ledgerBridge.getAddress_async(localpath).then(
+        (response) => { result = response }
+      ).fail(
+        (response) => { result = response }
+      );
+    } catch (e) {
+      break;
+    }
     if (result.address) {
-      ledgerAccounts[localpath] = result;
+      ledgerAccounts.push({
+        data: result,
+        path: localpath
+      });
       account_index = account_index + 1;
     } else {
       empty = true;
