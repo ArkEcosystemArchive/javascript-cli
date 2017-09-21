@@ -308,7 +308,7 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
 }
 
 ledgerWorker.on('message', function (message) {
-  if (message.connected && !ledgerComm){
+  if (message.connected && !ledgerComm && network) {
     ledger.comm_node.create_async().then((comm) => {
       ledgerComm = comm;
       ledgerBridge = new LedgerArk(ledgerComm);
@@ -316,7 +316,7 @@ ledgerWorker.on('message', function (message) {
     }).fail((error) => {
       console.log('ledger error: ', error);
     });
-  } else if (!message.connected && ledgerComm){
+  } else if (!message.connected && ledgerComm) {
     ledgerComm.close_async();
     ledgerComm = null;
     ledgerBridge = null;
