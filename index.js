@@ -17,6 +17,7 @@ var child_process = require('child_process');
 
 var ledger = require('ledgerco')
 var LedgerArk = require('./src/LedgerArk.js');
+var ledgerWorker = child_process.fork('./ledger-worker');
 
 var blessed = require('blessed');
 var contrib = require('blessed-contrib');
@@ -261,42 +262,42 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
   }
   transaction.senderPublicKey = account.publicKey;
   delete transaction.signature;
+  console.log('before', transaction);
   var transactionHex = arkjs.crypto.getBytes(transaction, true, true).toString("hex");
   var result = null;
+  console.log(account);
   console.log('Please sign the transaction on your Ledger');
   await ledgerBridge.signTransaction_async(account.path, transactionHex).then(
     (response) => { result = response }
   ).fail(
     (response) => { result = response }
   );
+  console.log('result', result);
   if (result.signature && result.signature !== '00000100') {
     transaction.signature = result.signature;
     transaction.id = arkjs.crypto.getId(transaction);
+    console.log('after', transaction);
   } else {
     transaction = null;
   }
   callback(transaction);
 }
 
-setInterval(async ()=>{
-  await ledger.comm_node.list_async().then((deviceList) => {
-    if (deviceList.length > 0 && !ledgerComm){
-      ledger.comm_node.create_async().then((comm) => {
-        ledgerComm = comm;
-        ledgerBridge = new LedgerArk(ledgerComm);
-        populateLedgerAccounts();
-      }).fail((error) => {
-        console.log('ledger error: ', error);
-      });
-    } else if (deviceList.length == 0){
-      ledgerComm = null;
-      ledgerBridge = null;
-    }
-  }).fail(() => {
+ledgerWorker.on('message', function (message) {
+  if (message.connected && !ledgerComm){
+    ledger.comm_node.create_async().then((comm) => {
+      ledgerComm = comm;
+      ledgerBridge = new LedgerArk(ledgerComm);
+      populateLedgerAccounts();
+    }).fail((error) => {
+      console.log('ledger error: ', error);
+    });
+  } else if (!message.connected && ledgerComm){
+    ledgerComm.close_async();
     ledgerComm = null;
     ledgerBridge = null;
-  });
-}, ledgerComm ? 5000 : 1000);
+  };
+});
 
 vorpal
   .command('connect <network>', 'Connect to network. Network is devnet or mainnet')
