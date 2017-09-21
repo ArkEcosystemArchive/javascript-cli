@@ -26,7 +26,7 @@ var network;
 var arkticker = {};
 var currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
 
-var legderAccounts = [];
+var ledgerAccounts = [];
 var ledgerBridge = null;
 var ledgerComm   = null;
 
