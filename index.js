@@ -294,7 +294,7 @@ setInterval(async ()=>{
     ledgerComm = null;
     ledgerBridge = null;
   });
-}, 1000);
+}, ledgerComm ? 5000 : 1000);
 
 vorpal
   .command('connect <network>', 'Connect to network. Network is devnet or mainnet')
