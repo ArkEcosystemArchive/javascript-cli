@@ -191,7 +191,8 @@ function getAccount(container, seriesCb) {
   if (ledgerAccounts.length) {
     var message = 'We have found the following Ledgers: \n';
     ledgerAccounts.forEach(function(ledger, index) {
-      message += (index + 1) + ') ' + ledger.data.address + '\n';
+      var balance = network.config.symbol + (ledger.data.accountData.balance / 100000000);
+      message += (index + 1) + ') ' + ledger.data.address + ' (' + balance + ')' + '\n';
     });
     message += 'N) passphrase\n\n';
     message += 'Please choose an option: ';
@@ -240,7 +241,7 @@ async function populateLedgerAccounts() {
       if (result.publicKey) {
         arkjs.crypto.setNetworkVersion(network.config.version);
         result.address = arkjs.crypto.getAddress(result.publicKey);
-        var requestJson = null;
+        var accountData = null;
         await requestPromise({
           uri: 'http://' + server + '/api/accounts?address=' + result.address,
           headers: {
@@ -251,11 +252,13 @@ async function populateLedgerAccounts() {
           timeout: 5000,
           json: true,
         }).then(
-          (body) => { requestJson = body }
+          (body) => { accountData = body }
         );
-        if (!requestJson || requestJson.success === false) {
+        if (!accountData || accountData.success === false) {
           empty = true;
           result = null;
+        } else {
+          result.accountData = accountData.account;
         }
       }
     } catch (e) {
