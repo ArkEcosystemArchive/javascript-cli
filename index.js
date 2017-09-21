@@ -596,13 +596,13 @@ vorpal
                   var unvoteTransaction = arkjs.vote.createVote(passphrase, ['-'+currentVote.publicKey]);
                   ledgerSignTransaction(seriesCb, unvoteTransaction, account, function(unvoteTransaction) {
                     if (!unvoteTransaction) {
-                      return seriesCb('Failed to sign transaction with ledger');
+                      return seriesCb('Failed to sign unvote transaction with ledger');
                     }
                     postTransaction(unvoteTransaction, function(err, response, body) {
                       if (err) {
                         return seriesCb('Failed to unvote previous delegate: ' + err);
                       } else if (!body.success){
-                        return seriesCb("Failed to send transaction: " + body.error);
+                        return seriesCb("Failed to send unvote transaction: " + body.error);
                       }
                       var transactionId = body.transactionIds.pop();
                       console.log('Waiting for unvote transaction (' + transactionId + ') to confirm.');
