@@ -748,20 +748,23 @@ vorpal
 
     async.waterfall([
       function(seriesCb){
-        self.prompt({
-          type: 'password',
-          name: 'passphrase',
-          message: 'passphrase: ',
-        }, function(result){
-          if (result.passphrase) {
-            return seriesCb(null, result.passphrase);
-          }
-          else{
-            return seriesCb("Aborted.");
-          }
-        });
+        getAccount(self, seriesCb);
       },
-      function(passphrase, seriesCb){
+      function(account, seriesCb){
+        arkjs.crypto.setNetworkVersion(network.config.version);
+        var publicKey = null;
+        var passphrase = '';
+        if (account.passphrase) {
+          passphrase = account.passphrase;
+          var keys = arkjs.crypto.getKeys(passphrase);
+          publicKey = keys.publicKey;
+        } else if (account.publicKey) {
+          publicKey = account.publicKey;
+        } else {
+          return seriesCb('No public key for account');
+        }
+        var address = arkjs.crypto.getAddress(publicKey);
+
         var arkamount = args.amount;
         var arkAmountString = args.amount;
 
@@ -773,8 +776,6 @@ vorpal
           arkAmountString = arkamount/100000000;
         }
 
-        var transaction = arkjs.transaction.createTransaction(args.recipient, arkamount, null, passphrase);
-
         self.prompt({
           type: 'confirm',
           name: 'continue',
@@ -782,7 +783,13 @@ vorpal
           message: 'Sending '+arkAmountString+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.recipient+' now',
         }, function(result){
           if (result.continue) {
-            return seriesCb(null, transaction);
+            var transaction = arkjs.transaction.createTransaction(args.recipient, arkamount, null, passphrase);
+            ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
+              if (!transaction) {
+                return seriesCb('Failed to sign transaction with ledger');
+              }
+              return seriesCb(null, transaction);
+            });
           }
           else {
             return seriesCb("Aborted.")
