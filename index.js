@@ -200,7 +200,7 @@ function getAccount(container, seriesCb) {
       name: 'account',
       message: message,
     }, function(result){
-      if (result.account === 'N') {
+      if (result.account.toUpperCase() === 'N') {
         getPassPhrase();
       } else if (ledgerAccounts[result.account - 1]) {
         return seriesCb(null, {
