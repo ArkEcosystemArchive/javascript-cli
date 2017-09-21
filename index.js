@@ -296,7 +296,9 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
   ).fail(
     (response) => { result = response }
   );
-  if (result.signature && result.signature !== '00000100') {
+  if (result.signature && result.signature === '00000100') {
+    return seriesCb('We could not sign the transaction. There may be another application interacting with your ledger.');
+  } else if (result.signature) {
     transaction.signature = result.signature;
     transaction.id = arkjs.crypto.getId(transaction);
   } else {
