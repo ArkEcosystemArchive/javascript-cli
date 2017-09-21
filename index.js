@@ -249,6 +249,33 @@ async function populateLedgerAccounts() {
   }
 }
 
+async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
+  if (!account.publicKey || !account.path) {
+    return transaction;
+  }
+
+  var fromAddress = arkjs.crypto.getAddress(account.publicKey);
+  transaction.senderId = fromAddress;
+  transaction.recipientId = fromAddress;
+  transaction.senderPublicKey = account.publicKey;
+  delete transaction.signature;
+  var transactionHex = arkjs.crypto.getBytes(transaction, true, true).toString("hex");
+  var result = null;
+  console.log('Please sign the transaction on your Ledger');
+  await ledgerBridge.signTransaction_async(account.path, transactionHex).then(
+    (response) => { result = response }
+  ).fail(
+    (response) => { result = response }
+  );
+  if (result.signature && result.signature !== '00000100') {
+    transaction.signature = result.signature;
+    transaction.id = arkjs.crypto.getId(transaction);
+  } else {
+    transaction = null;
+  }
+  callback(transaction);
+}
+
 setInterval(async ()=>{
   await ledger.comm_node.list_async().then((deviceList) => {
     if (deviceList.length > 0 && !ledgerComm){
