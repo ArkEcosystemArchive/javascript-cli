@@ -643,23 +643,22 @@ vorpal
     }
     async.waterfall([
       function(seriesCb){
-        self.prompt({
-          type: 'password',
-          name: 'passphrase',
-          message: 'passphrase: ',
-        }, function(result){
-          if (result.passphrase) {
-            return seriesCb(null, result.passphrase);
-          }
-          else{
-            return seriesCb("Aborted.");
-          }
-        });
+        getAccount(self, seriesCb);
       },
-      function(passphrase, seriesCb){
+      function(account, seriesCb){
         arkjs.crypto.setNetworkVersion(network.config.version);
-        var keys = arkjs.crypto.getKeys(passphrase);
-        var address = arkjs.crypto.getAddress(keys.publicKey);
+        var publicKey = null;
+        var passphrase = '';
+        if (account.passphrase) {
+          passphrase = account.passphrase;
+          var keys = arkjs.crypto.getKeys(passphrase);
+          publicKey = keys.publicKey;
+        } else if (account.publicKey) {
+          publicKey = account.publicKey;
+        } else {
+          return seriesCb('No public key for account');
+        }
+        var address = arkjs.crypto.getAddress(publicKey);
         getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
           body = JSON.parse(body);
           if (!body.success) {
@@ -678,7 +677,12 @@ vorpal
           }, function(result){
             if (result.continue) {
               var transaction = arkjs.vote.createVote(passphrase, delegates);
-              return seriesCb(null, transaction);
+              ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
+                if (!transaction) {
+                  return seriesCb('Failed to sign transaction with ledger');
+                }
+                return seriesCb(null, transaction);
+              });
             } else {
               return seriesCb("Aborted.");
             }
