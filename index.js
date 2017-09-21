@@ -188,11 +188,11 @@ function getAccount(container, seriesCb) {
       }
     });
   }
-  if (Object.keys(ledgerAccounts).length) {
+  if (ledgerAccounts.length) {
     var message = 'We have found the following Ledgers: \n';
     console.log(ledgerAccounts);
     ledgerAccounts.forEach(function(ledger, index) {
-      message += (index + 1) + ') ' + ledger.data.publicKey + '\n';
+      message += (index + 1) + ') ' + ledger.data.address + '\n';
     });
     message += 'N) passphrase\n\n';
     message += 'Please choose an option: ';
@@ -204,9 +204,11 @@ function getAccount(container, seriesCb) {
       if (result.account.toUpperCase() === 'N') {
         getPassPhrase();
       } else if (ledgerAccounts[result.account - 1]) {
+        var ledger = ledgerAccounts[result.account - 1];
         return seriesCb(null, {
-          publicKey: ledgerAccounts[result.account - 1].data.publicKey,
-          path: ledgerAccounts[result.account - 1].path,
+          address: ledger.data.address,
+          publicKey: ledger.data.publicKey,
+          path: ledger.path,
         });
       } else {
         return seriesCb("Failed to get Accounts");
@@ -278,10 +280,9 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
     return callback(transaction);
   }
 
-  var fromAddress = arkjs.crypto.getAddress(account.publicKey);
-  transaction.senderId = fromAddress;
+  transaction.senderId = account.address;
   if (transaction.type === 3) {
-    transaction.recipientId = fromAddress;
+    transaction.recipientId = account.address;
   }
   transaction.senderPublicKey = account.publicKey;
   delete transaction.signature;
@@ -549,18 +550,20 @@ vorpal
       function(account, seriesCb) {
         var delegateName = args.name;
         arkjs.crypto.setNetworkVersion(network.config.version);
+        var address = null;
         var publicKey = null;
         var passphrase = '';
         if (account.passphrase) {
           passphrase = account.passphrase;
           var keys = arkjs.crypto.getKeys(passphrase);
           publicKey = keys.publicKey;
+          address = arkjs.crypto.getAddress(publicKey);
         } else if (account.publicKey) {
+          address = account.address;
           publicKey = account.publicKey;
         } else {
           return seriesCb('No public key for account');
         }
-        var address = arkjs.crypto.getAddress(publicKey);
         getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
           body = JSON.parse(body);
           if (!body.success) {
@@ -673,18 +676,20 @@ vorpal
       },
       function(account, seriesCb){
         arkjs.crypto.setNetworkVersion(network.config.version);
+        var address = null;
         var publicKey = null;
         var passphrase = '';
         if (account.passphrase) {
           passphrase = account.passphrase;
           var keys = arkjs.crypto.getKeys(passphrase);
           publicKey = keys.publicKey;
+          address = arkjs.crypto.getAddress(publicKey);
         } else if (account.publicKey) {
+          address = account.address;
           publicKey = account.publicKey;
         } else {
           return seriesCb('No public key for account');
         }
-        var address = arkjs.crypto.getAddress(publicKey);
         getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
           body = JSON.parse(body);
           if (!body.success) {
@@ -778,18 +783,20 @@ vorpal
       },
       function(account, seriesCb){
         arkjs.crypto.setNetworkVersion(network.config.version);
+        var address = null;
         var publicKey = null;
         var passphrase = '';
         if (account.passphrase) {
           passphrase = account.passphrase;
           var keys = arkjs.crypto.getKeys(passphrase);
           publicKey = keys.publicKey;
+          address = arkjs.crypto.getAddress(publicKey);
         } else if (account.publicKey) {
+          address = account.address;
           publicKey = account.publicKey;
         } else {
           return seriesCb('No public key for account');
         }
-        var address = arkjs.crypto.getAddress(publicKey);
 
         var arkamount = args.amount;
         var arkAmountString = args.amount;
@@ -860,18 +867,20 @@ vorpal
       },
       function(account, seriesCb) {
         arkjs.crypto.setNetworkVersion(network.config.version);
+        var address = null;
         var publicKey = null;
         var passphrase = '';
         if (account.passphrase) {
           passphrase = account.passphrase;
           var keys = arkjs.crypto.getKeys(passphrase);
           publicKey = keys.publicKey;
+          address = arkjs.crypto.getAddress(publicKey);
         } else if (account.publicKey) {
+          address = account.address;
           publicKey = account.publicKey;
         } else {
           return seriesCb('No public key for account');
         }
-        var address = arkjs.crypto.getAddress(publicKey);
         var transaction = arkjs.delegate.createDelegate(passphrase, args.username);
         ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
           if (!transaction) {
