@@ -318,6 +318,7 @@ ledgerWorker.on('message', function (message) {
     ledgerComm.close_async();
     ledgerComm = null;
     ledgerBridge = null;
+    ledgerAccounts = [];
   };
 });
 
