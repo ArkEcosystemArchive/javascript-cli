@@ -41,6 +41,7 @@
     "ledgerco": "github:ledgerhq/ledger-node-js-api#master",
     "ora": "^1.1.0",
     "request": "^2.79.0",
+    "request-promise-native": "^1.0.4",
     "vorpal": "^1.11.4"
   }
 }
