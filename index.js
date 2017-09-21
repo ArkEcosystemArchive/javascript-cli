@@ -4,6 +4,7 @@ var crypto = require("crypto");
 var figlet = require("figlet");
 var colors = require("colors");
 var request = require("request");
+var requestPromise = require("request-promise-native");
 var asciichart = require ('asciichart');
 var chart = require ('chart');
 var cliSpinners = require('cli-spinners');
@@ -235,10 +236,32 @@ async function populateLedgerAccounts() {
       ).fail(
         (response) => { result = response }
       );
+      if (result.publicKey) {
+        arkjs.crypto.setNetworkVersion(network.config.version);
+        result.address = arkjs.crypto.getAddress(result.publicKey);
+        var requestJson = null;
+        await requestPromise({
+          uri: 'http://' + server + '/api/accounts?address=' + result.address,
+          headers: {
+            nethash: network.nethash,
+            version: '1.0.0',
+            port: 1
+          },
+          timeout: 5000,
+          json: true,
+        }).then(
+          (body) => { requestJson = body }
+        );
+        if (!requestJson || requestJson.success === false) {
+          empty = true;
+          result = null;
+        }
+      }
     } catch (e) {
+      console.log('no request:', e);
       break;
     }
-    if (result.address) {
+    if (result && result.address) {
       ledgerAccounts.push({
         data: result,
         path: localpath
