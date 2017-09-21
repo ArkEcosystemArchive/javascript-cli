@@ -517,25 +517,24 @@ vorpal
       return callback();
     }
     async.waterfall([
-      function(seriesCb){
-        self.prompt({
-          type: 'password',
-          name: 'passphrase',
-          message: 'passphrase: ',
-        }, function(result){
-          if (result.passphrase) {
-            return seriesCb(null, result.passphrase);
-          }
-          else{
-            return seriesCb("Aborted.");
-          }
-        });
+      function(seriesCb) {
+        getAccount(self, seriesCb);
       },
-      function(passphrase, seriesCb){
+      function(account, seriesCb) {
         var delegateName = args.name;
         arkjs.crypto.setNetworkVersion(network.config.version);
-        var keys = arkjs.crypto.getKeys(passphrase);
-        var address = arkjs.crypto.getAddress(keys.publicKey);
+        var publicKey = null;
+        var passphrase = '';
+        if (account.passphrase) {
+          passphrase = account.passphrase;
+          var keys = arkjs.crypto.getKeys(passphrase);
+          publicKey = keys.publicKey;
+        } else if (account.publicKey) {
+          publicKey = account.publicKey;
+        } else {
+          return seriesCb('No public key for account');
+        }
+        var address = arkjs.crypto.getAddress(publicKey);
         getFromNode('http://'+server+'/api/accounts/delegates/?address='+address, function(err, response, body) {
           body = JSON.parse(body);
           if (!body.success) {
@@ -567,31 +566,41 @@ vorpal
               if (result.continue) {
                 if (currentVote) {
                   var unvoteTransaction = arkjs.vote.createVote(passphrase, ['-'+currentVote.publicKey]);
-                  postTransaction(unvoteTransaction, function(err, response, body) {
-                    if (err) {
-                      return seriesCb('Failed to unvote previous delegate: ' + err);
-                    } else if (!body.success){
-                      return seriesCb("Failed to send transaction: " + body.error);
+                  ledgerSignTransaction(seriesCb, unvoteTransaction, account, function(unvoteTransaction) {
+                    if (!unvoteTransaction) {
+                      return seriesCb('Failed to sign transaction with ledger');
                     }
-                    var transactionId = body.transactionIds.pop();
-                    console.log('Waiting for unvote transaction (' + transactionId + ') to confirm.');
-                    var checkTransactionTimerId = setInterval(function() {
-                      getFromNode('http://' + server + '/api/transactions/get?id=' + transactionId, function(err, response, body) {
-                        var body = JSON.parse(body);
-                        if (!body.success && body.error !== 'Transaction not found') {
-                          clearInterval(checkTransactionTimerId);
-                          return seriesCb('Failed to fetch unconfirmed transaction: ' + body.error);
-                        } else if (body.transaction) {
-                          clearInterval(checkTransactionTimerId);
-                          var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
-                          return seriesCb(null, transaction);
-                        }
-                      });
-                    }, 2000);
+                    postTransaction(unvoteTransaction, function(err, response, body) {
+                      if (err) {
+                        return seriesCb('Failed to unvote previous delegate: ' + err);
+                      } else if (!body.success){
+                        return seriesCb("Failed to send transaction: " + body.error);
+                      }
+                      var transactionId = body.transactionIds.pop();
+                      console.log('Waiting for unvote transaction (' + transactionId + ') to confirm.');
+                      var checkTransactionTimerId = setInterval(function() {
+                        getFromNode('http://' + server + '/api/transactions/get?id=' + transactionId, function(err, response, body) {
+                          var body = JSON.parse(body);
+                          if (!body.success && body.error !== 'Transaction not found') {
+                            clearInterval(checkTransactionTimerId);
+                            return seriesCb('Failed to fetch unconfirmed transaction: ' + body.error);
+                          } else if (body.transaction) {
+                            clearInterval(checkTransactionTimerId);
+                            var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                            return seriesCb(null, transaction);
+                          }
+                        });
+                      }, 2000);
+                    });
                   });
                 } else {
                   var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
-                  return seriesCb(null, transaction);
+                  ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
+                    if (!transaction) {
+                      return seriesCb('Failed to sign transaction with ledger');
+                    }
+                    return seriesCb(null, transaction);
+                  });
                 }
               } else {
                 return seriesCb("Aborted.")
