@@ -615,7 +615,12 @@ vorpal
                           } else if (body.transaction) {
                             clearInterval(checkTransactionTimerId);
                             var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
-                            return seriesCb(null, transaction);
+                            ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
+                              if (!transaction) {
+                                return seriesCb('Failed to sign vote transaction with ledger');
+                              }
+                              return seriesCb(null, transaction);
+                            });
                           }
                         });
                       }, 2000);
