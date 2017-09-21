@@ -252,7 +252,7 @@ async function populateLedgerAccounts() {
 
 async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
   if (!account.publicKey || !account.path) {
-    return transaction;
+    return callback(transaction);
   }
 
   var fromAddress = arkjs.crypto.getAddress(account.publicKey);
