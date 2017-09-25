@@ -308,15 +308,17 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
 }
 
 ledgerWorker.on('message', function (message) {
-  if (message.connected && network && (!ledgerComm || !ledgerAccounts.length)) {
+  if (message.connected && (!ledgerComm || !ledgerAccounts.length)) {
     ledger.comm_node.create_async().then((comm) => {
       ledgerComm = comm;
       ledgerBridge = new LedgerArk(ledgerComm);
+      vorpal.log('Ledger App Connected');
       populateLedgerAccounts();
     }).fail((error) => {
-      console.log('ledger error: ', error);
+      //console.log('ledger error: ', error);
     });
   } else if (!message.connected && ledgerComm) {
+    vorpal.log('Ledger App Disconnected');
     ledgerComm.close_async();
     ledgerComm = null;
     ledgerBridge = null;
@@ -330,28 +332,38 @@ vorpal
 		var self = this;
     network = networks[args.network];
 
-      if(!network){
-          self.log("Network not found");
-          return callback();
-      }
+    if(!network){
+        self.log("Network not found");
+        return callback();
+    }
 
-    server = network.peers[Math.floor(Math.random()*1000)%network.peers.length];
-    findEnabledPeers(function(peers){
-      if(peers.length>0){
-        server=peers[0];
-        network.peers=peers;
-      }
+    connect2network(network,function(){
+      getFromNode('http://'+server+'/peer/status', function(err, response, body){
+        self.log("Node: " + server + ", height: " + JSON.parse(body).height);
+        self.delimiter('ark '+args.network+'>');
+        callback();
+      });
     });
-    getFromNode('http://'+server+'/api/loader/autoconfigure', function(err, response, body){
-      network.config = JSON.parse(body).network;
-      console.log(network.config);
-    });
-    getFromNode('http://'+server+'/peer/status', function(err, response, body){
-      self.log("Node: " + server + ", height: " + JSON.parse(body).height);
-      self.delimiter('ark '+args.network+'>');
-      callback();
-    });
+    
   });
+
+function connect2network(n, callback){
+  server = n.peers[Math.floor(Math.random()*1000)%n.peers.length];
+  findEnabledPeers(function(peers){
+    if(peers.length>0){
+      server=peers[0];
+      n.peers=peers;
+    }
+  });
+  getFromNode('http://'+server+'/api/loader/autoconfigure', function(err, response, body){
+    if(!body) connect2network(n, callback);
+    else{
+      n.config = JSON.parse(body).network;
+      self.log(n.config);
+      callback();
+    }
+  });
+}
 
 
 vorpal
