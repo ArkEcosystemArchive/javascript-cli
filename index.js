@@ -275,6 +275,10 @@ async function populateLedgerAccounts() {
       empty = true;
     }
   }
+
+  if (ledgerAccounts.length) {
+    vorpal.log('Ledger App Connected');
+  }
 }
 
 async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
@@ -313,9 +317,6 @@ ledgerWorker.on('message', function (message) {
       ledgerComm = comm;
       ledgerBridge = new LedgerArk(ledgerComm);
       populateLedgerAccounts();
-      if (!!ledgerAccounts.length) {
-        vorpal.log('Ledger App Connected');
-      }
     }).fail((error) => {
       //console.log('ledger error: ', error);
     });
