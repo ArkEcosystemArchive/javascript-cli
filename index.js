@@ -312,8 +312,10 @@ ledgerWorker.on('message', function (message) {
     ledger.comm_node.create_async().then((comm) => {
       ledgerComm = comm;
       ledgerBridge = new LedgerArk(ledgerComm);
-      vorpal.log('Ledger App Connected');
       populateLedgerAccounts();
+      if (!!ledgerAccounts.length) {
+        vorpal.log('Ledger App Connected');
+      }
     }).fail((error) => {
       //console.log('ledger error: ', error);
     });
