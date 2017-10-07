@@ -275,6 +275,10 @@ async function populateLedgerAccounts() {
       empty = true;
     }
   }
+
+  if (ledgerAccounts.length) {
+    vorpal.log('Ledger App Connected');
+  }
 }
 
 async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
@@ -308,11 +312,10 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
 }
 
 ledgerWorker.on('message', function (message) {
-  if (message.connected && (!ledgerComm || !ledgerAccounts.length)) {
+  if (message.connected && network && (!ledgerComm || !ledgerAccounts.length)) {
     ledger.comm_node.create_async().then((comm) => {
       ledgerComm = comm;
       ledgerBridge = new LedgerArk(ledgerComm);
-      vorpal.log('Ledger App Connected');
       populateLedgerAccounts();
     }).fail((error) => {
       //console.log('ledger error: ', error);
