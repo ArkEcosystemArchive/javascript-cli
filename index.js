@@ -15,10 +15,11 @@ var async = require('async');
 var vorpal = require('vorpal')();
 var cluster = require('cluster');
 var child_process = require('child_process');
+var Path = require('path');
 
 var ledger = require('ledgerco')
 var LedgerArk = require('./src/LedgerArk.js');
-var ledgerWorker = child_process.fork('./ledger-worker');
+var ledgerWorker = child_process.fork(Path.resolve(__dirname, './ledger-worker'));
 
 var blessed = require('blessed');
 var contrib = require('blessed-contrib');
