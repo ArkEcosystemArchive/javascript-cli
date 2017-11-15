@@ -362,7 +362,7 @@ function connect2network(n, callback){
     if(!body) connect2network(n, callback);
     else{
       n.config = JSON.parse(body).network;
-      self.log(n.config);
+      vorpal.log(n.config);
       callback();
     }
   });
