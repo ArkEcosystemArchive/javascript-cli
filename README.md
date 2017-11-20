@@ -15,7 +15,7 @@ Features:
 - sign and verify message using your address.
 
 # Installation
-You need to have node installed. Then:
+You need to have node (version 7.6.0 or newer) installed. Then:
 ```
 $> npm install -g arkecosystem/ark-client#master
 $> ark-client
