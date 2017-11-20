@@ -134,9 +134,9 @@ function findEnabledPeers(cb){
   });
 }
 
-function postTransaction(transaction, cb){
-  request(
-    {
+function postTransaction(container, transaction, cb){
+  var performPost = function() {
+    request({
       url: 'http://'+server+'/peer/transactions',
       headers: {
         nethash: network.nethash,
@@ -146,9 +146,36 @@ function postTransaction(transaction, cb){
       method: 'POST',
       json: true,
       body: {transactions:[transaction]}
-    },
-    cb
-  );
+    }, cb);
+  };
+
+  let senderAddress = arkjs.crypto.getAddress(transaction.senderPublicKey);
+  getFromNode('http://' + server + '/api/accounts?address=' + senderAddress, function(err, response, body){
+    if(!body) {
+      performPost();
+    } else {
+      body = JSON.parse(body);
+      if (body.account.secondSignature) {
+        container.prompt({
+          type: 'password',
+          name: 'passphrase',
+          message: 'Second passphrase: ',
+        }, function(result) {
+          if (result.passphrase) {
+            var secondKeys = arkjs.crypto.getKeys(result.passphrase);
+            arkjs.crypto.secondSign(transaction, secondKeys);
+            transaction.id = arkjs.crypto.getId(transaction);
+            performPost();
+          } else {
+            vorpal.log('No second passphrase given. Trying without.');
+            performPost();
+          }
+        });
+      } else {
+        performPost();
+      }
+    }
+  });
 }
 
 function getFromNode(url, cb){
@@ -240,7 +267,6 @@ async function populateLedgerAccounts() {
         (response) => { result = response }
       );
       if (result.publicKey) {
-        arkjs.crypto.setNetworkVersion(network.config.version);
         result.address = arkjs.crypto.getAddress(result.publicKey);
         var accountData = null;
         await requestPromise({
@@ -345,10 +371,11 @@ vorpal
       getFromNode('http://'+server+'/peer/status', function(err, response, body){
         self.log("Node: " + server + ", height: " + JSON.parse(body).height);
         self.delimiter('ark '+args.network+'>');
+        arkjs.crypto.setNetworkVersion(network.config.version);
         callback();
       });
     });
-    
+
   });
 
 function connect2network(n, callback){
@@ -566,7 +593,6 @@ vorpal
       },
       function(account, seriesCb) {
         var delegateName = args.name;
-        arkjs.crypto.setNetworkVersion(network.config.version);
         var address = null;
         var publicKey = null;
         var passphrase = '';
@@ -616,7 +642,7 @@ vorpal
                     if (!unvoteTransaction) {
                       return seriesCb('Failed to sign unvote transaction with ledger');
                     }
-                    postTransaction(unvoteTransaction, function(err, response, body) {
+                    postTransaction(self, unvoteTransaction, function(err, response, body) {
                       if (err) {
                         return seriesCb('Failed to unvote previous delegate: ' + err);
                       } else if (!body.success){
@@ -661,7 +687,7 @@ vorpal
         });
       },
       function(transaction, seriesCb){
-        postTransaction(transaction, function(err, response, body){
+        postTransaction(self, transaction, function(err, response, body){
           if(err){
             seriesCb("Failed to send transaction: " + err);
           }
@@ -697,7 +723,6 @@ vorpal
         getAccount(self, seriesCb);
       },
       function(account, seriesCb){
-        arkjs.crypto.setNetworkVersion(network.config.version);
         var address = null;
         var publicKey = null;
         var passphrase = '';
@@ -743,7 +768,7 @@ vorpal
         });
       },
       function(transaction, seriesCb){
-        postTransaction(transaction, function(err, response, body){
+        postTransaction(self, transaction, function(err, response, body){
           if(err){
             seriesCb("Failed to send transaction: " + err);
           }
@@ -804,7 +829,6 @@ vorpal
         getAccount(self, seriesCb);
       },
       function(account, seriesCb){
-        arkjs.crypto.setNetworkVersion(network.config.version);
         var address = null;
         var publicKey = null;
         var passphrase = '';
@@ -835,7 +859,7 @@ vorpal
           type: 'confirm',
           name: 'continue',
           default: false,
-          message: 'Sending '+arkAmountString+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
+          message: 'Sending '+arkAmountString+network.config.token+' '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
         }, function(result){
           if (result.continue) {
             var transaction = arkjs.transaction.createTransaction(args.address, arkamount, null, passphrase);
@@ -852,7 +876,7 @@ vorpal
         });
       },
       function(transaction, seriesCb){
-        postTransaction(transaction, function(err, response, body){
+        postTransaction(self, transaction, function(err, response, body){
           if(err){
             seriesCb("Failed to send transaction: " + err);
           }
@@ -888,7 +912,6 @@ vorpal
         getAccount(self, seriesCb);
       },
       function(account, seriesCb) {
-        arkjs.crypto.setNetworkVersion(network.config.version);
         var address = null;
         var publicKey = null;
         var passphrase = '';
@@ -912,7 +935,7 @@ vorpal
         });
       },
       function(transaction, seriesCb) {
-        postTransaction(transaction, function(err, response, body){
+        postTransaction(self, transaction, function(err, response, body){
           if(err){
             seriesCb("Failed to send transaction: " + err);
           }
@@ -944,7 +967,6 @@ vorpal
       self.log("please connect to node or network before, in order to retrieve necessery information about address prefixing");
       return callback();
     }
-    arkjs.crypto.setNetworkVersion(network.config.version);
     var passphrase = require("bip39").generateMnemonic();
 		self.log("Seed    - private:",passphrase);
 		self.log("WIF     - private:",arkjs.crypto.getKeys(passphrase).toWIF());
@@ -961,7 +983,6 @@ vorpal
       return callback();
     }
 
-    arkjs.crypto.setNetworkVersion(network.config.version);
     var count=0;
     var numCPUs = require('os').cpus().length;
     var cps=[];
