@@ -1,18 +1,21 @@
-# ark-client
-CLI client for ark blockchain.
-You can connect to devnet, mainnet or your custom private/public ark-derived blockchain
+![ARK Client](https://i.imgur.com/Sj3s29m.jpg)
 
-Featuring:
-- connection to network or a node
-- get stats of network
-- create or get status of account
-- create vanity accounts (multi-cpu supported)
-- send amount in USD, EUR or other FIAT currency at the market price (ARK only)
-- create delegate, vote for delegate
+# ark-client
+CLI client for ARK blockchain.
+You can connect to devnet, mainnet or your custom private/public ARK-derived blockchain.
+
+Features:
+- connection to network or a node,
+- get stats of a network,
+- create or get status of an account,
+- create vanity accounts (multi-cpu supported),
+- send amount in USD, EUR or other FIAT currency at the market price (ARK only),
+- register a delegate,
+- vote for a delegate,
 - sign and verify message using your address.
 
 # Installation
-You need to have node installed. Then
+You need to have node installed. Then:
 ```
 $> npm install -g arkecosystem/ark-client#master
 $> ark-client
@@ -91,7 +94,11 @@ ark devnet> account status DMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH
 ```
 
 # License
-Copyright © 2017 ARK.io | Copyright © 2017 FX Thoorens
+
+**MIT License**
+
+- Copyright © 2017 ARK.io
+- Copyright © 2017 FX Thoorens
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
 
