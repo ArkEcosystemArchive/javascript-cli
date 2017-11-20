@@ -15,10 +15,11 @@ var async = require('async');
 var vorpal = require('vorpal')();
 var cluster = require('cluster');
 var child_process = require('child_process');
+var Path = require('path');
 
 var ledger = require('ledgerco')
 var LedgerArk = require('./src/LedgerArk.js');
-var ledgerWorker = child_process.fork('./ledger-worker');
+var ledgerWorker = child_process.fork(Path.resolve(__dirname, './ledger-worker'));
 
 var blessed = require('blessed');
 var contrib = require('blessed-contrib');
@@ -372,7 +373,7 @@ vorpal
         callback();
       });
     });
-    
+
   });
 
 function connect2network(n, callback){
@@ -387,7 +388,7 @@ function connect2network(n, callback){
     if(!body) connect2network(n, callback);
     else{
       n.config = JSON.parse(body).network;
-      self.log(n.config);
+      vorpal.log(n.config);
       callback();
     }
   });
