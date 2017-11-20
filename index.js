@@ -859,7 +859,7 @@ vorpal
           type: 'confirm',
           name: 'continue',
           default: false,
-          message: 'Sending '+arkAmountString+'ARK '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
+          message: 'Sending '+arkAmountString+network.config.token+' '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
         }, function(result){
           if (result.continue) {
             var transaction = arkjs.transaction.createTransaction(args.address, arkamount, null, passphrase);
