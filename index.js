@@ -267,7 +267,6 @@ async function populateLedgerAccounts() {
         (response) => { result = response }
       );
       if (result.publicKey) {
-        arkjs.crypto.setNetworkVersion(network.config.version);
         result.address = arkjs.crypto.getAddress(result.publicKey);
         var accountData = null;
         await requestPromise({
@@ -372,6 +371,7 @@ vorpal
       getFromNode('http://'+server+'/peer/status', function(err, response, body){
         self.log("Node: " + server + ", height: " + JSON.parse(body).height);
         self.delimiter('ark '+args.network+'>');
+        arkjs.crypto.setNetworkVersion(network.config.version);
         callback();
       });
     });
@@ -593,7 +593,6 @@ vorpal
       },
       function(account, seriesCb) {
         var delegateName = args.name;
-        arkjs.crypto.setNetworkVersion(network.config.version);
         var address = null;
         var publicKey = null;
         var passphrase = '';
@@ -724,7 +723,6 @@ vorpal
         getAccount(self, seriesCb);
       },
       function(account, seriesCb){
-        arkjs.crypto.setNetworkVersion(network.config.version);
         var address = null;
         var publicKey = null;
         var passphrase = '';
@@ -831,7 +829,6 @@ vorpal
         getAccount(self, seriesCb);
       },
       function(account, seriesCb){
-        arkjs.crypto.setNetworkVersion(network.config.version);
         var address = null;
         var publicKey = null;
         var passphrase = '';
@@ -915,7 +912,6 @@ vorpal
         getAccount(self, seriesCb);
       },
       function(account, seriesCb) {
-        arkjs.crypto.setNetworkVersion(network.config.version);
         var address = null;
         var publicKey = null;
         var passphrase = '';
@@ -971,7 +967,6 @@ vorpal
       self.log("please connect to node or network before, in order to retrieve necessery information about address prefixing");
       return callback();
     }
-    arkjs.crypto.setNetworkVersion(network.config.version);
     var passphrase = require("bip39").generateMnemonic();
 		self.log("Seed    - private:",passphrase);
 		self.log("WIF     - private:",arkjs.crypto.getKeys(passphrase).toWIF());
@@ -988,7 +983,6 @@ vorpal
       return callback();
     }
 
-    arkjs.crypto.setNetworkVersion(network.config.version);
     var count=0;
     var numCPUs = require('os').cpus().length;
     var cps=[];
