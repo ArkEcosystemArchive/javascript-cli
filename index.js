@@ -148,30 +148,32 @@ function postTransaction(container, transaction, cb){
       body: {transactions:[transaction]}
     }, cb);
   };
-  container.prompt({
-    type: 'confirm',
-    name: 'continue',
-    default: false,
-    message: 'Do you have a second passphrase?',
-  }, function(result) {
-    if (result.continue) {
-      container.prompt({
-        type: 'password',
-        name: 'passphrase',
-        message: 'Second passphrase: ',
-      }, function(result) {
-        if (result.passphrase) {
-          var secondKeys = arkjs.crypto.getKeys(result.passphrase);
-          arkjs.crypto.secondSign(transaction, secondKeys);
-          transaction.id = arkjs.crypto.getId(transaction);
-          performPost();
-        } else {
-          console.log('No second passphrase given. Trying without.');
-          performPost();
-        }
-      });
-    } else {
+
+  let senderAddress = arkjs.crypto.getAddress(transaction.senderPublicKey);
+  getFromNode('http://' + server + '/api/accounts?address=' + senderAddress, function(err, response, body){
+    if(!body) {
       performPost();
+    } else {
+      body = JSON.parse(body);
+      if (body.account.secondSignature) {
+        container.prompt({
+          type: 'password',
+          name: 'passphrase',
+          message: 'Second passphrase: ',
+        }, function(result) {
+          if (result.passphrase) {
+            var secondKeys = arkjs.crypto.getKeys(result.passphrase);
+            arkjs.crypto.secondSign(transaction, secondKeys);
+            transaction.id = arkjs.crypto.getId(transaction);
+            performPost();
+          } else {
+            vorpal.log('No second passphrase given. Trying without.');
+            performPost();
+          }
+        });
+      } else {
+        performPost();
+      }
     }
   });
 }
