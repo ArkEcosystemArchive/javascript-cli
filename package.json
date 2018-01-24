@@ -38,7 +38,7 @@
     "cowsay": "^1.1.9",
     "figlet": "^1.2.0",
     "le-table": "^6.1.4",
-    "ledgerco": "github:ledgerhq/ledger-node-js-api#master",
+    "ledgerco": "github:ledgerhq/ledger-node-js-api#6cde5978b9d0a4922f0d33520b16cc2184559ebc",
     "ora": "^1.1.0",
     "q": "^1.5.0",
     "request": "^2.79.0",
