@@ -97,6 +97,7 @@ var networks = {
   }
 };
 
+//
 function getNetworkFromNethash(nethash){
   for(var n in networks){
     if(networks[n].nethash == nethash){
