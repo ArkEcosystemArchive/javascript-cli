@@ -28,7 +28,6 @@ LedgerArk.prototype.getAddress_async = function(path) {
 		var addressLength = response[1 + publicKeyLength];
 		result['publicKey'] = response.slice(1, 1 + publicKeyLength).toString('hex');
 		result['address'] = response.slice(1 + publicKeyLength + 1, 1 + publicKeyLength + 1 + addressLength).toString('ascii');
-		console.log('here yo')
 		return result;
 	});
 }
