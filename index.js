@@ -555,12 +555,20 @@ vorpal
         return callback();
       }
       for(var i in a){
-        if(!a[i] || a[i].length==0) delete a[i];
+        if(!a[i] || a[i].length === 0) delete a[i];
       }
       delete a.address;
       var table = new Table();
       table.setHeading(Object.keys(a));
-      table.addRow(Object.values(a));
+      var rowItems = [];
+      Object.keys(a).map(function (key) {
+        var value = a[key];
+        if (['unconfirmedBalance', 'balance'].includes(key)) {
+          value = value / 100000000;
+        }
+        rowItems.push(value);
+      });
+      table.addRow(rowItems);
       self.log(table.toString());
       getFromNode('http://'+server+'/api/delegates/get/?publicKey='+a.publicKey, function(err, response, body){
         var body = JSON.parse(body);
@@ -851,15 +859,17 @@ vorpal
           if(!arkticker[currency]){
             return seriesCb("Can't get price from market. Aborted.");
           }
-          arkamount = parseInt(args.amount * 100000000 / Number(arkticker[currency]["price_"+currency.toLowerCase()]))
+          arkamount = parseInt(args.amount * 100000000 / Number(arkticker[currency]["price_"+currency.toLowerCase()]));
           arkAmountString = arkamount/100000000;
+        } else {
+          arkamount = parseInt(args.amount * 100000000);
         }
 
         self.prompt({
           type: 'confirm',
           name: 'continue',
           default: false,
-          message: 'Sending '+arkAmountString+network.config.token+' '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
+          message: 'Sending ' + arkAmountString + ' ' + network.config.token+' '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
         }, function(result){
           if (result.continue) {
             var transaction = arkjs.transaction.createTransaction(args.address, arkamount, null, passphrase);
