@@ -1036,7 +1036,7 @@ vorpal
     }, function(result){
       if (result.passphrase) {
         var hash = crypto.createHash('sha256');
-        hash = hash.update(new Buffer(args.message,"utf-8")).digest();
+        hash = hash.update(Buffer.from(args.message,"utf-8")).digest();
         self.log("public key: ",arkjs.crypto.getKeys(result.passphrase).publicKey);
         self.log("address   : ",arkjs.crypto.getAddress(arkjs.crypto.getKeys(result.passphrase).publicKey));
         self.log("signature : ",arkjs.crypto.getKeys(result.passphrase).sign(hash).toDER().toString("hex"));
@@ -1060,9 +1060,9 @@ vorpal
       if (result.signature) {
         try{
           var hash = crypto.createHash('sha256');
-          hash = hash.update(new Buffer(args.message,"utf-8")).digest();
-          var signature = new Buffer(result.signature, "hex");
-        	var publickey= new Buffer(args.publickey, "hex");
+          hash = hash.update(Buffer.from(args.message,"utf-8")).digest();
+          var signature = Buffer.from(result.signature, "hex");
+        	var publickey= Buffer.from(args.publickey, "hex");
         	var ecpair = arkjs.ECPair.fromPublicKeyBuffer(publickey);
         	var ecsignature = arkjs.ECSignature.fromDER(signature);
         	var res = ecpair.verify(hash, ecsignature);
