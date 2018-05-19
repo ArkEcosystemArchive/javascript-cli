@@ -151,9 +151,7 @@ function postTransaction(container, transaction, cb){
 
   let senderAddress = arkjs.crypto.getAddress(transaction.senderPublicKey);
   getFromNode('http://' + server + '/api/accounts?address=' + senderAddress, function(err, response, body){
-    if(!body) {
-      performPost();
-    } else {
+    if(body) {
       body = JSON.parse(body);
       if (body.account.secondSignature) {
         container.prompt({
@@ -165,15 +163,15 @@ function postTransaction(container, transaction, cb){
             var secondKeys = arkjs.crypto.getKeys(result.passphrase);
             arkjs.crypto.secondSign(transaction, secondKeys);
             transaction.id = arkjs.crypto.getId(transaction);
-            performPost();
+            
           } else {
             vorpal.log('No second passphrase given. Trying without.');
-            performPost();
+            
           }
         });
-      } else {
-        performPost();
+
       }
+      performPost(); 
     }
   });
 }
