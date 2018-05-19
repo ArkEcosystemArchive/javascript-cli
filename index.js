@@ -150,16 +150,16 @@ function postTransaction(container, transaction, cb){
   };
 
   let senderAddress = arkjs.crypto.getAddress(transaction.senderPublicKey);
-  getFromNode('http://' + server + '/api/accounts?address=' + senderAddress, 
-    function(err, response, body){
-    // handle the potential error
-    if(err) {
-      vorpal.log('Someting went wrong: '+err);
-
-    } else { 
-      if(body) {
-        body = JSON.parse(body);
-        if (body.account.secondSignature) {
+  getFromNode('http://' + server + '/api/accounts?address=' + senderAddress, function(err, response, body){
+    
+    if(!err && body) {
+      try {
+        body = JSON.parse(body);       
+        if ( !body.hasOwnProperty('success') || body.success === false) {
+          // The account does not yet exist on the connected node. 
+          throw "Failed: " + body.error;
+        }  
+        if (body.hasOwnProperty('account') && body.account.secondSignature) {
           container.prompt({
             type: 'password',
             name: 'passphrase',
@@ -169,16 +169,16 @@ function postTransaction(container, transaction, cb){
               var secondKeys = arkjs.crypto.getKeys(result.passphrase);
               arkjs.crypto.secondSign(transaction, secondKeys);
               transaction.id = arkjs.crypto.getId(transaction);
-            
             } else {
-              vorpal.log('No second passphrase given. Trying without.');
-            
+              vorpal.log('No second passphrase given. Trying without.');            
             }
           });
-        }
-        performPost(); 
-      } // if(body)
-    } // if(err)  
+        }   
+      } catch (error) {
+        vorpal.log(colors.red(error));
+      } 
+    } // if(body)
+    performPost();
   });
 }
 
