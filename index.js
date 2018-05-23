@@ -17,9 +17,15 @@ var cluster = require('cluster');
 var child_process = require('child_process');
 var Path = require('path');
 
-var ledger = require('ledgerco')
-var LedgerArk = require('./src/LedgerArk.js');
-var ledgerWorker = child_process.fork(Path.resolve(__dirname, './ledger-worker'));
+var ledgerSupported = true;
+try {
+  var ledger = require('ledgerco');
+  var LedgerArk = require('./src/LedgerArk.js');
+  var ledgerWorker = child_process.fork(Path.resolve(__dirname, './ledger-worker'));
+} catch (USBError) {
+  ledgerSupported = false;
+  vorpal.log(colors.yellow("Warning: Ark-Client is running on a server or virtual machine: No Ledger support available."));
+}
 
 var blessed = require('blessed');
 var contrib = require('blessed-contrib');
@@ -216,7 +222,7 @@ function getAccount(container, seriesCb) {
       }
     });
   }
-  if (ledgerAccounts.length) {
+  if (ledgerSupported && ledgerAccounts.length) {
     var message = 'We have found the following Ledgers: \n';
     ledgerAccounts.forEach(function(ledger, index) {
       var balance = network.config.symbol + (ledger.data.accountData.balance / 100000000);
@@ -248,7 +254,7 @@ function getAccount(container, seriesCb) {
 }
 
 async function populateLedgerAccounts() {
-  if (!ledgerBridge) {
+  if (!ledgerSupported || !ledgerBridge) {
     return;
   }
   ledgerAccounts = [];
@@ -309,7 +315,7 @@ async function populateLedgerAccounts() {
 }
 
 async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
-  if (!account.publicKey || !account.path) {
+  if (!ledgerSupported || !account.publicKey || !account.path) {
     return callback(transaction);
   }
 
@@ -338,23 +344,25 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
   callback(transaction);
 }
 
-ledgerWorker.on('message', function (message) {
-  if (message.connected && network && (!ledgerComm || !ledgerAccounts.length)) {
-    ledger.comm_node.create_async().then((comm) => {
-      ledgerComm = comm;
-      ledgerBridge = new LedgerArk(ledgerComm);
-      populateLedgerAccounts();
-    }).fail((error) => {
-      //console.log('ledger error: ', error);
-    });
-  } else if (!message.connected && ledgerComm) {
-    vorpal.log('Ledger App Disconnected');
-    ledgerComm.close_async();
-    ledgerComm = null;
-    ledgerBridge = null;
-    ledgerAccounts = [];
-  };
-});
+if (ledgerSupported) {
+  ledgerWorker.on('message', function (message) {
+    if (message.connected && network && (!ledgerComm || !ledgerAccounts.length)) {
+      ledger.comm_node.create_async().then((comm) => {
+        ledgerComm = comm;
+        ledgerBridge = new LedgerArk(ledgerComm);
+        populateLedgerAccounts();
+      }).fail((error) => {
+        //console.log('ledger error: ', error);
+      });
+    } else if (!message.connected && ledgerComm) {
+      vorpal.log('Ledger App Disconnected');
+      ledgerComm.close_async();
+      ledgerComm = null;
+      ledgerBridge = null;
+      ledgerAccounts = [];
+    };
+  });
+}
 
 vorpal
   .command('connect <network>', 'Connect to network. Network is devnet or mainnet')
