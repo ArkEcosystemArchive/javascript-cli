@@ -42,7 +42,8 @@ var networks = {
       "167.114.29.53:4002",
       "167.114.29.54:4002",
       "167.114.29.55:4002"
-    ]
+    ],
+    ledgerpath: "44'/1'/"
   },
   mainnet: {
     nethash: "6e84d08bd299ed97c212c886c98a57e36545c8f5d645ca7eeae63a8bd62d8988",
@@ -93,7 +94,8 @@ var networks = {
       "193.70.72.88:4001",
       "193.70.72.89:4001",
       "193.70.72.90:4001"
-    ]
+    ],
+    ledgerpath: "44'/111'/"
   }
 };
 
@@ -179,7 +181,7 @@ function postTransaction(container, transaction, cb){
 }
 
 function getFromNode(url, cb){
-  nethash=network?network.nethash:"";
+  let nethash=network?network.nethash:"";
   request(
     {
       url: url,
@@ -247,6 +249,15 @@ function getAccount(container, seriesCb) {
   }
 }
 
+function resetLedger() {
+  ledgerAccounts = [];
+  ledgerBridge = null;
+  if (ledgerComm !== null) {
+    ledgerComm.close_async();
+    ledgerComm   = null;  
+  }
+}
+
 async function populateLedgerAccounts() {
   if (!ledgerBridge) {
     return;
@@ -254,7 +265,7 @@ async function populateLedgerAccounts() {
   ledgerAccounts = [];
   var accounts = [];
   var account_index = 0;
-  var path = "44'/111'/";
+  var path = network.hasOwnProperty('ledgerpath') ? network.ledgerpath : "44'/111'/";
   var empty = false;
 
   while (!empty) {
@@ -282,11 +293,22 @@ async function populateLedgerAccounts() {
           (body) => { accountData = body }
         );
         if (!accountData || accountData.success === false) {
+          // Add an empty available account when 0 transactions have been made.
           empty = true;
-          result = null;
+          result.accountData = {
+            address: result.address,
+            unconfirmedBalance: "0",
+            balance: "0",
+            publicKey: result.publicKey,
+            unconfirmedSignature: 0,
+            secondSignature: 0,
+            secondPublicKey: null,
+            multisignatures: [],
+            u_multisignatures: []
+          };
         } else {
           result.accountData = accountData.account;
-        }
+        } 
       }
     } catch (e) {
       console.log('no request:', e);
@@ -345,20 +367,24 @@ ledgerWorker.on('message', function (message) {
       ledgerBridge = new LedgerArk(ledgerComm);
       populateLedgerAccounts();
     }).fail((error) => {
-      //console.log('ledger error: ', error);
+      //vorpal.log(colors.red('ledger error: ' +error));
     });
   } else if (!message.connected && ledgerComm) {
     vorpal.log('Ledger App Disconnected');
-    ledgerComm.close_async();
-    ledgerComm = null;
-    ledgerBridge = null;
-    ledgerAccounts = [];
+    resetLedger();
   };
 });
 
 vorpal
   .command('connect <network>', 'Connect to network. Network is devnet or mainnet')
   .action(function(args, callback) {
+    // reset an existing connection first
+    if(server) {
+      server=null;
+      network=null;
+      resetLedger();
+    }
+
 		var self = this;
     network = networks[args.network];
 
@@ -400,6 +426,13 @@ function connect2network(n, callback){
 vorpal
   .command('connect node <url>', 'Connect to a server. For example "connect node 5.39.9.251:4000"')
   .action(function(args, callback) {
+    // reset an existing connection first
+    if(server) {
+      server=null;
+      network=null;
+      resetLedger();
+    }
+
 		var self = this;
     server=args.url;
     getFromNode('http://'+server+'/api/blocks/getNethash', function(err, response, body){
@@ -450,6 +483,7 @@ vorpal
     self.delimiter('ark>');
     server=null;
     network=null;
+    resetLedger();
     callback();
   });
 
