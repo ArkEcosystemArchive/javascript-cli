@@ -153,30 +153,34 @@ function postTransaction(container, transaction, cb){
 
   let senderAddress = arkjs.crypto.getAddress(transaction.senderPublicKey);
   getFromNode('http://' + server + '/api/accounts?address=' + senderAddress, function(err, response, body){
-    if(!body) {
-      performPost();
-    } else {
-      body = JSON.parse(body);
-      if (body.account.secondSignature) {
-        container.prompt({
-          type: 'password',
-          name: 'passphrase',
-          message: 'Second passphrase: ',
-        }, function(result) {
-          if (result.passphrase) {
-            var secondKeys = arkjs.crypto.getKeys(result.passphrase);
-            arkjs.crypto.secondSign(transaction, secondKeys);
-            transaction.id = arkjs.crypto.getId(transaction);
-            performPost();
-          } else {
-            vorpal.log('No second passphrase given. Trying without.');
-            performPost();
-          }
-        });
-      } else {
-        performPost();
-      }
-    }
+    
+    if(!err && body) {
+      try {
+        body = JSON.parse(body);       
+        if ( !body.hasOwnProperty('success') || body.success === false) {
+          // The account does not yet exist on the connected node. 
+          throw "Failed: " + body.error;
+        }  
+        if (body.hasOwnProperty('account') && body.account.secondSignature) {
+          container.prompt({
+            type: 'password',
+            name: 'passphrase',
+            message: 'Second passphrase: ',
+          }, function(result) {
+            if (result.passphrase) {
+              var secondKeys = arkjs.crypto.getKeys(result.passphrase);
+              arkjs.crypto.secondSign(transaction, secondKeys);
+              transaction.id = arkjs.crypto.getId(transaction);
+            } else {
+              vorpal.log('No second passphrase given. Trying without.');            
+            }
+          });
+        }   
+      } catch (error) {
+        vorpal.log(colors.red(error));
+      } 
+    } // if(body)
+    performPost();
   });
 }
 
