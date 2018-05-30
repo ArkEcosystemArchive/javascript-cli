@@ -30,6 +30,7 @@ try {
 var blessed = require('blessed');
 var contrib = require('blessed-contrib');
 
+var connected = false;
 var server;
 var network;
 var arkticker = {};
@@ -104,6 +105,10 @@ var networks = {
     ledgerpath: "44'/111'/"
   }
 };
+
+function isConnected() {
+  return server && connected;
+}
 
 function getNetworkFromNethash(nethash){
   for(var n in networks){
@@ -410,6 +415,7 @@ vorpal
         self.log("Node: " + server + ", height: " + JSON.parse(body).height);
         self.delimiter('ark '+args.network+'>');
         arkjs.crypto.setNetworkVersion(network.config.version);
+	connected = true;
         callback();
       });
     });
@@ -483,6 +489,7 @@ vorpal
       getFromNode('http://'+server+'/peer/status', function(err, response, body){
         self.log("Node height ", JSON.parse(body).height);
       });
+      connected = true;
       callback();
     });
   });
@@ -495,6 +502,8 @@ vorpal
     self.delimiter('ark>');
     server=null;
     network=null;
+    connected = false;
+  
     resetLedger();
     callback();
   });
@@ -503,7 +512,7 @@ vorpal
   .command('network stats', 'Get stats from network')
   .action(function(args, callback) {
     var self = this;
-    if(!server){
+    if(!isConnected()){
       self.log("Please connect to node or network before");
       return callback();
     }
@@ -588,7 +597,7 @@ vorpal
   .command('account status <address>', 'Get account status')
   .action(function(args, callback) {
     var self = this;
-    if(!server){
+    if(!isConnected()){
       self.log("please connect to node or network before");
       return callback();
     }
@@ -637,7 +646,7 @@ vorpal
   .command('account vote <name>', 'Vote for delegate <name>. Remove previous vote if needed')
   .action(function(args, callback) {
     var self = this;
-    if(!server){
+    if(!isConnected()){
       self.log("please connect to node or network before");
       return callback();
     }
@@ -780,7 +789,7 @@ vorpal
   .command('account unvote', 'Remove previous vote')
   .action(function(args, callback) {
     var self = this;
-    if(!server){
+    if(!isConnected()){
       self.log("please connect to node or network before");
       return callback();
     }
@@ -865,7 +874,7 @@ vorpal
   .command('account send <amount> <address>', 'Send <amount> ark to <address>. <amount> format examples: 10, USD10.4, EUR100')
   .action(function(args, callback) {
 		var self = this;
-    if(!server){
+    if(!isConnected()){
       self.log("please connect to node or network before");
       return callback();
     }
@@ -979,7 +988,7 @@ vorpal
   .command('account delegate <username>', 'Register new delegate with <username> ')
   .action(function(args, callback) {
 		var self = this;
-    if(!server){
+    if(!isConnected()){
       self.log("please connect to node or network before");
       return callback();
     }
@@ -1043,7 +1052,7 @@ vorpal
   .command('account create', 'Generate a new random cold account')
   .action(function(args, callback) {
 		var self = this;
-    if(!server){
+    if(!isConnected()){
       self.log("please connect to node or network before, in order to retrieve necessery information about address prefixing");
       return callback();
     }
@@ -1058,7 +1067,7 @@ vorpal
   .command('account vanity <string>', 'Generate an address containing lowercased <string> (WARNING you could wait for long)')
   .action(function(args, callback) {
     var self=this;
-    if(!server){
+    if(!isConnected()){
       self.log("please connect to node or network before, in order to retrieve necessery information about address prefixing");
       return callback();
     }
