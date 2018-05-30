@@ -17,9 +17,15 @@ var cluster = require('cluster');
 var child_process = require('child_process');
 var Path = require('path');
 
-var ledger = require('ledgerco')
-var LedgerArk = require('./src/LedgerArk.js');
-var ledgerWorker = child_process.fork(Path.resolve(__dirname, './ledger-worker'));
+var ledgerSupported = true;
+try {
+  var ledger = require('ledgerco');
+  var LedgerArk = require('./src/LedgerArk.js');
+  var ledgerWorker = child_process.fork(Path.resolve(__dirname, './ledger-worker'));
+} catch (USBError) {
+  ledgerSupported = false;
+  vorpal.log(colors.yellow("Warning: Ark-Client is running on a server or virtual machine: No Ledger support available."));
+}
 
 var blessed = require('blessed');
 var contrib = require('blessed-contrib');
@@ -43,7 +49,8 @@ var networks = {
       "167.114.29.53:4002",
       "167.114.29.54:4002",
       "167.114.29.55:4002"
-    ]
+    ],
+    ledgerpath: "44'/1'/"
   },
   mainnet: {
     nethash: "6e84d08bd299ed97c212c886c98a57e36545c8f5d645ca7eeae63a8bd62d8988",
@@ -94,7 +101,8 @@ var networks = {
       "193.70.72.88:4001",
       "193.70.72.89:4001",
       "193.70.72.90:4001"
-    ]
+    ],
+    ledgerpath: "44'/111'/"
   }
 };
 
@@ -156,35 +164,39 @@ function postTransaction(container, transaction, cb){
 
   let senderAddress = arkjs.crypto.getAddress(transaction.senderPublicKey);
   getFromNode('http://' + server + '/api/accounts?address=' + senderAddress, function(err, response, body){
-    if(!body) {
-      performPost();
-    } else {
-      body = JSON.parse(body);
-      if (body.account.secondSignature) {
-        container.prompt({
-          type: 'password',
-          name: 'passphrase',
-          message: 'Second passphrase: ',
-        }, function(result) {
-          if (result.passphrase) {
-            var secondKeys = arkjs.crypto.getKeys(result.passphrase);
-            arkjs.crypto.secondSign(transaction, secondKeys);
-            transaction.id = arkjs.crypto.getId(transaction);
-            performPost();
-          } else {
-            vorpal.log('No second passphrase given. Trying without.');
-            performPost();
-          }
-        });
-      } else {
-        performPost();
-      }
-    }
+    
+    if(!err && body) {
+      try {
+        body = JSON.parse(body);       
+        if ( !body.hasOwnProperty('success') || body.success === false) {
+          // The account does not yet exist on the connected node. 
+          throw "Failed: " + body.error;
+        }  
+        if (body.hasOwnProperty('account') && body.account.secondSignature) {
+          container.prompt({
+            type: 'password',
+            name: 'passphrase',
+            message: 'Second passphrase: ',
+          }, function(result) {
+            if (result.passphrase) {
+              var secondKeys = arkjs.crypto.getKeys(result.passphrase);
+              arkjs.crypto.secondSign(transaction, secondKeys);
+              transaction.id = arkjs.crypto.getId(transaction);
+            } else {
+              vorpal.log('No second passphrase given. Trying without.');            
+            }
+          });
+        }   
+      } catch (error) {
+        vorpal.log(colors.red(error));
+      } 
+    } // if(body)
+    performPost();
   });
 }
 
 function getFromNode(url, cb){
-  nethash=network?network.nethash:"";
+  let nethash=network?network.nethash:"";
   request(
     {
       url: url,
@@ -221,7 +233,7 @@ function getAccount(container, seriesCb) {
       }
     });
   }
-  if (ledgerAccounts.length) {
+  if (ledgerSupported && ledgerAccounts.length) {
     var message = 'We have found the following Ledgers: \n';
     ledgerAccounts.forEach(function(ledger, index) {
       var balance = network.config.symbol + (ledger.data.accountData.balance / 100000000);
@@ -252,14 +264,23 @@ function getAccount(container, seriesCb) {
   }
 }
 
+function resetLedger() {
+  ledgerAccounts = [];
+  ledgerBridge = null;
+  if (ledgerComm !== null) {
+    ledgerComm.close_async();
+    ledgerComm   = null;  
+  }
+}
+
 async function populateLedgerAccounts() {
-  if (!ledgerBridge) {
+  if (!ledgerSupported || !ledgerBridge) {
     return;
   }
   ledgerAccounts = [];
   var accounts = [];
   var account_index = 0;
-  var path = "44'/111'/";
+  var path = network.hasOwnProperty('ledgerpath') ? network.ledgerpath : "44'/111'/";
   var empty = false;
 
   while (!empty) {
@@ -287,11 +308,22 @@ async function populateLedgerAccounts() {
           (body) => { accountData = body }
         );
         if (!accountData || accountData.success === false) {
+          // Add an empty available account when 0 transactions have been made.
           empty = true;
-          result = null;
+          result.accountData = {
+            address: result.address,
+            unconfirmedBalance: "0",
+            balance: "0",
+            publicKey: result.publicKey,
+            unconfirmedSignature: 0,
+            secondSignature: 0,
+            secondPublicKey: null,
+            multisignatures: [],
+            u_multisignatures: []
+          };
         } else {
           result.accountData = accountData.account;
-        }
+        } 
       }
     } catch (e) {
       console.log('no request:', e);
@@ -314,7 +346,7 @@ async function populateLedgerAccounts() {
 }
 
 async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
-  if (!account.publicKey || !account.path) {
+  if (!ledgerSupported || !account.publicKey || !account.path) {
     return callback(transaction);
   }
 
@@ -343,6 +375,7 @@ async function ledgerSignTransaction(seriesCb, transaction, account, callback) {
   callback(transaction);
 }
 
+if (ledgerSupported) {
 ledgerWorker.on('message', function (message) {
   if (message.connected && network && (!ledgerComm || !ledgerAccounts.length)) {
     ledger.comm_node.create_async().then((comm) => {
@@ -350,20 +383,25 @@ ledgerWorker.on('message', function (message) {
       ledgerBridge = new LedgerArk(ledgerComm);
       populateLedgerAccounts();
     }).fail((error) => {
-      //console.log('ledger error: ', error);
+      //vorpal.log(colors.red('ledger error: ' +error));
     });
   } else if (!message.connected && ledgerComm) {
     vorpal.log('Ledger App Disconnected');
-    ledgerComm.close_async();
-    ledgerComm = null;
-    ledgerBridge = null;
-    ledgerAccounts = [];
+    resetLedger();
   };
 });
+}
 
 vorpal
   .command('connect <network>', 'Connect to network. Network is devnet or mainnet')
   .action(function(args, callback) {
+    // reset an existing connection first
+    if(server) {
+      server=null;
+      network=null;
+      resetLedger();
+    }
+
 		var self = this;
     network = networks[args.network];
 
@@ -406,6 +444,13 @@ function connect2network(n, callback){
 vorpal
   .command('connect node <url>', 'Connect to a server. For example "connect node 5.39.9.251:4000"')
   .action(function(args, callback) {
+    // reset an existing connection first
+    if(server) {
+      server=null;
+      network=null;
+      resetLedger();
+    }
+
 		var self = this;
     server=args.url;
     getFromNode('http://'+server+'/api/blocks/getNethash', function(err, response, body){
@@ -458,6 +503,8 @@ vorpal
     server=null;
     network=null;
     connected = false;
+  
+    resetLedger();
     callback();
   });
 
@@ -653,7 +700,11 @@ vorpal
             }, function(result){
               if (result.continue) {
                 if (currentVote) {
-                  var unvoteTransaction = arkjs.vote.createVote(passphrase, ['-'+currentVote.publicKey]);
+                  try {
+                    var unvoteTransaction = arkjs.vote.createVote(passphrase, ['-'+currentVote.publicKey]);
+                  } catch (error) {
+                    return seriesCb('Failed: ' + error);
+                  }
                   ledgerSignTransaction(seriesCb, unvoteTransaction, account, function(unvoteTransaction) {
                     if (!unvoteTransaction) {
                       return seriesCb('Failed to sign unvote transaction with ledger');
@@ -674,7 +725,11 @@ vorpal
                             return seriesCb('Failed to fetch unconfirmed transaction: ' + body.error);
                           } else if (body.transaction) {
                             clearInterval(checkTransactionTimerId);
-                            var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                            try {
+                              var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                            } catch (error) {
+                              return seriesCb('Failed: ' + error);
+                            }
                             ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
                               if (!transaction) {
                                 return seriesCb('Failed to sign vote transaction with ledger');
@@ -687,7 +742,11 @@ vorpal
                     });
                   });
                 } else {
-                  var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                  try {
+                    var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                  } catch (error) {
+                    return seriesCb('Failed: ' + error);
+                  }
                   ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
                     if (!transaction) {
                       return seriesCb('Failed to sign transaction with ledger');
@@ -770,7 +829,11 @@ vorpal
             message: 'Removing last vote for ' + lastDelegate.username,
           }, function(result){
             if (result.continue) {
-              var transaction = arkjs.vote.createVote(passphrase, delegates);
+              try {
+                var transaction = arkjs.vote.createVote(passphrase, delegates);
+              } catch (error) {
+                return seriesCb('Failed: ' + error);
+              }
               ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
                 if (!transaction) {
                   return seriesCb('Failed to sign transaction with ledger');
@@ -880,7 +943,11 @@ vorpal
           message: 'Sending ' + arkAmountString + ' ' + network.config.token+' '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
         }, function(result){
           if (result.continue) {
-            var transaction = arkjs.transaction.createTransaction(args.address, arkamount, null, passphrase);
+            try {
+              var transaction = arkjs.transaction.createTransaction(args.address, arkamount, null, passphrase);
+            } catch (error) {
+              return seriesCb('Failed: ' + error);
+            }
             ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
               if (!transaction) {
                 return seriesCb('Failed to sign transaction with ledger');
@@ -944,7 +1011,11 @@ vorpal
         } else {
           return seriesCb('No public key for account');
         }
-        var transaction = arkjs.delegate.createDelegate(passphrase, args.username);
+        try {
+          var transaction = arkjs.delegate.createDelegate(passphrase, args.username);
+        } catch (error) {
+          return seriesCb('Failed: ' + error);
+        }
         ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
           if (!transaction) {
             return seriesCb('Failed to sign transaction with ledger');
