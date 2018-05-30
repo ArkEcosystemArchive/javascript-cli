@@ -645,7 +645,11 @@ vorpal
             }, function(result){
               if (result.continue) {
                 if (currentVote) {
-                  var unvoteTransaction = arkjs.vote.createVote(passphrase, ['-'+currentVote.publicKey]);
+                  try {
+                    var unvoteTransaction = arkjs.vote.createVote(passphrase, ['-'+currentVote.publicKey]);
+                  } catch (error) {
+                    return seriesCb('Failed: ' + error);
+                  }
                   ledgerSignTransaction(seriesCb, unvoteTransaction, account, function(unvoteTransaction) {
                     if (!unvoteTransaction) {
                       return seriesCb('Failed to sign unvote transaction with ledger');
@@ -666,7 +670,11 @@ vorpal
                             return seriesCb('Failed to fetch unconfirmed transaction: ' + body.error);
                           } else if (body.transaction) {
                             clearInterval(checkTransactionTimerId);
-                            var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                            try {
+                              var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                            } catch (error) {
+                              return seriesCb('Failed: ' + error);
+                            }
                             ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
                               if (!transaction) {
                                 return seriesCb('Failed to sign vote transaction with ledger');
@@ -679,7 +687,11 @@ vorpal
                     });
                   });
                 } else {
-                  var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                  try {
+                    var transaction = arkjs.vote.createVote(passphrase, ['+'+newDelegate.publicKey]);
+                  } catch (error) {
+                    return seriesCb('Failed: ' + error);
+                  }
                   ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
                     if (!transaction) {
                       return seriesCb('Failed to sign transaction with ledger');
@@ -762,7 +774,11 @@ vorpal
             message: 'Removing last vote for ' + lastDelegate.username,
           }, function(result){
             if (result.continue) {
-              var transaction = arkjs.vote.createVote(passphrase, delegates);
+              try {
+                var transaction = arkjs.vote.createVote(passphrase, delegates);
+              } catch (error) {
+                return seriesCb('Failed: ' + error);
+              }
               ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
                 if (!transaction) {
                   return seriesCb('Failed to sign transaction with ledger');
@@ -872,7 +888,11 @@ vorpal
           message: 'Sending ' + arkAmountString + ' ' + network.config.token+' '+(currency?'('+currency+args.amount+') ':'')+'to '+args.address+' now',
         }, function(result){
           if (result.continue) {
-            var transaction = arkjs.transaction.createTransaction(args.address, arkamount, null, passphrase);
+            try {
+              var transaction = arkjs.transaction.createTransaction(args.address, arkamount, null, passphrase);
+            } catch (error) {
+              return seriesCb('Failed: ' + error);
+            }
             ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
               if (!transaction) {
                 return seriesCb('Failed to sign transaction with ledger');
@@ -936,7 +956,11 @@ vorpal
         } else {
           return seriesCb('No public key for account');
         }
-        var transaction = arkjs.delegate.createDelegate(passphrase, args.username);
+        try {
+          var transaction = arkjs.delegate.createDelegate(passphrase, args.username);
+        } catch (error) {
+          return seriesCb('Failed: ' + error);
+        }
         ledgerSignTransaction(seriesCb, transaction, account, function(transaction) {
           if (!transaction) {
             return seriesCb('Failed to sign transaction with ledger');
