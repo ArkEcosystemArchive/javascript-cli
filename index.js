@@ -1,21 +1,21 @@
 #!/usr/bin/env node
-var arkjs = require("arkjs");
-var crypto = require("crypto");
-var figlet = require("figlet");
-var colors = require("colors");
-var request = require("request");
-var requestPromise = require("request-promise-native");
-var asciichart = require ('asciichart');
-var chart = require ('chart');
-var cliSpinners = require('cli-spinners');
-var Table = require('ascii-table');
-var ora = require('ora');
-var cowsay = require('cowsay');
-var async = require('async');
-var vorpal = require('vorpal')();
-var cluster = require('cluster');
-var child_process = require('child_process');
-var Path = require('path');
+const arkjs = require("arkjs");
+const crypto = require("crypto");
+const figlet = require("figlet");
+const colors = require("colors");
+const request = require("request");
+const requestPromise = require("request-promise-native");
+///const asciichart = require ('asciichart');
+///const chart = require ('chart');
+///const cliSpinners = require('cli-spinners');
+const Table = require('ascii-table');
+const ora = require('ora');
+const cowsay = require('cowsay');
+const async = require('async');
+const vorpal = require('vorpal')();
+///const cluster = require('cluster');
+const child_process = require('child_process');
+const Path = require('path');
 
 var ledgerSupported = true;
 try {
@@ -34,13 +34,13 @@ var connected = false;
 var server;
 var network;
 var arkticker = {};
-var currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"]
+const currencies = ["USD","AUD", "BRL", "CAD", "CHF", "CNY", "EUR", "GBP", "HKD", "IDR", "INR", "JPY", "KRW", "MXN", "RUB"];
 
 var ledgerAccounts = [];
 var ledgerBridge = null;
 var ledgerComm   = null;
 
-var networks = {
+const networks = {
   devnet: {
     nethash: "578e820911f24e039733b45e4882b73e301f813a0d2c31330dafda84534ffa23",
     peers: [
@@ -232,7 +232,7 @@ function getAccount(container, seriesCb) {
         return seriesCb("Aborted.");
       }
     });
-  }
+  };
   if (ledgerSupported && ledgerAccounts.length) {
     var message = 'We have found the following Ledgers: \n';
     ledgerAccounts.forEach(function(ledger, index) {
@@ -278,7 +278,7 @@ async function populateLedgerAccounts() {
     return;
   }
   ledgerAccounts = [];
-  var accounts = [];
+  ///var accounts = [];
   var account_index = 0;
   var path = network.hasOwnProperty('ledgerpath') ? network.ledgerpath : "44'/111'/";
   var empty = false;
@@ -388,8 +388,8 @@ ledgerWorker.on('message', function (message) {
   } else if (!message.connected && ledgerComm) {
     vorpal.log('Ledger App Disconnected');
     resetLedger();
-  };
-});
+  }  
+}); 
 }
 
 vorpal
@@ -477,7 +477,7 @@ vorpal
         network = {
           nethash: nethash,
           peers:[server]
-        }
+        };
         networks[nethash]=network;
       }
       getFromNode('http://'+server+'/api/loader/autoconfigure', function(err, response, body){
@@ -563,7 +563,7 @@ vorpal
         },function(err){
           spinner.stop();
           var screen = blessed.screen();
-          var grid = new contrib.grid({rows: 12, cols: 12, screen: screen})
+          var grid = new contrib.grid({rows: 12, cols: 12, screen: screen});
           var line = grid.set(0, 0, 6, 6, contrib.line,
               { style:
                  { line: "yellow"
@@ -579,7 +579,7 @@ vorpal
           screen.append(line); //must append before setting data
           line.setData([data]);
 
-          var bar = grid.set(6, 0, 6, 12, contrib.bar, { label: 'Network Height', barWidth: 4, barSpacing: 6, xOffset: 0, maxHeight: 9})
+          var bar = grid.set(6, 0, 6, 12, contrib.bar, { label: 'Network Height', barWidth: 4, barSpacing: 6, xOffset: 0, maxHeight: 9});
           screen.append(bar); //must append before setting data
           bar.setData({titles: Object.keys(heights), data: Object.values(heights)});
 
@@ -626,7 +626,7 @@ vorpal
       table.addRow(rowItems);
       self.log(table.toString());
       getFromNode('http://'+server+'/api/delegates/get/?publicKey='+a.publicKey, function(err, response, body){
-        var body = JSON.parse(body);
+        body = JSON.parse(body);
         if(body.success){
           var delegate=body.delegate;
           delete delegate.address;
@@ -683,7 +683,7 @@ vorpal
             }
           }
           getFromNode('http://'+server+'/api/delegates/get/?username='+delegateName, function(err, response, body){
-            var body = JSON.parse(body);
+            body = JSON.parse(body);
             if (!body.success) {
               return seriesCb("Failed: " + body.error);
             }
@@ -719,7 +719,7 @@ vorpal
                       console.log('Waiting for unvote transaction (' + transactionId + ') to confirm.');
                       var checkTransactionTimerId = setInterval(function() {
                         getFromNode('http://' + server + '/api/transactions/get?id=' + transactionId, function(err, response, body) {
-                          var body = JSON.parse(body);
+                          body = JSON.parse(body);
                           if (!body.success && body.error !== 'Transaction not found') {
                             clearInterval(checkTransactionTimerId);
                             return seriesCb('Failed to fetch unconfirmed transaction: ' + body.error);
@@ -755,7 +755,7 @@ vorpal
                   });
                 }
               } else {
-                return seriesCb("Aborted.")
+                return seriesCb("Aborted.");
               }
             });
           });
@@ -930,10 +930,10 @@ vorpal
           if(!arkticker[currency]){
             return seriesCb("Can't get price from market. Aborted.");
           }
-          arkamount = parseInt(args.amount * 100000000 / Number(arkticker[currency]["price_"+currency.toLowerCase()]));
+          arkamount = parseInt(args.amount * 100000000 / Number(arkticker[currency]["price_"+currency.toLowerCase()]),10);
           arkAmountString = arkamount/100000000;
         } else {
-          arkamount = parseInt(args.amount * 100000000);
+          arkamount = parseInt(args.amount * 100000000, 10);
         }
 
         self.prompt({
@@ -956,7 +956,7 @@ vorpal
             });
           }
           else {
-            return seriesCb("Aborted.")
+            return seriesCb("Aborted.");
           }
         });
       },
