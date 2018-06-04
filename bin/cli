@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
-const commander = require('commander');
+const commander = require('commander')
 
-const { message, wallet } = require('../lib/commands');
+const { Message, Wallet } = require('../lib/commands')
 
 commander
-  .version('1.0.0');
+  .version('1.0.0')
   
 commander
   .command('wallet <address>')
@@ -14,7 +14,7 @@ commander
   .option('-c, --node <node>', 'Connect directly to node <node>.')
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
-  .action(async (address, cmd) => wallet.status(address, cmd));
+  .action(async (address, cmd) => Wallet.status(address, cmd))
  
 commander
   .command('create')
@@ -26,11 +26,11 @@ commander
   .option('--vanity <string>', 'Create a vanity wallet that contains <string>.')
   .action(async (cmd) => {
     if(cmd.vanity) {
-      await wallet.vanity(cmd.vanity);
-      return;
+      await Wallet.vanity(cmd.vanity)
+      return
     }
-    await wallet.create();
-  });
+    await Wallet.create()
+  })
   
 commander
   .command('send <amount> <recepient>')
@@ -41,7 +41,7 @@ commander
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
   .option('-s, --smartbridge <smartbridge>', 'Enter a string for the SmartBridge.')
-  .action(async (amount, recepient, cmd) => wallet.send(amount, recepient, cmd));
+  .action(async (amount, recepient, cmd) => Wallet.send(amount, recepient, cmd))
   
 commander
   .command('vote <delegate>')
@@ -51,7 +51,7 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
-  .action(async (delegate,cmd) => wallet.vote(delegate, cmd));
+  .action(async (delegate,cmd) => Wallet.vote(delegate, cmd))
   
 commander
   .command('delegate <username>')
@@ -61,7 +61,7 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
-  .action(async (username,cmd) => wallet.delegate(username, cmd));
+  .action(async (username,cmd) => Wallet.delegate(username, cmd))
   
 commander
   .command('stats')
@@ -70,7 +70,7 @@ commander
   .option('-c, --node <node>', 'Connect directly to node <node>.')  
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
-  .action(async (cmd) => wallet.delegate(cmd));
+  .action(async (cmd) => Wallet.delegate(cmd))
   
 commander
   .command('sign <message>')
@@ -80,7 +80,7 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
-  .action(async (message, cmd) => message.sign(message, cmd));
+  .action(async (message, cmd) => Message.sign(message, cmd))
   
 commander
   .command('verify <message> <publickey>')
@@ -89,12 +89,12 @@ commander
   .option('-c, --node <node>', 'Connect directly to node <node>.')  
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
-  .action(async (message, publickey, cmd) => message.verify(message, publickey, cmd));
+  .action(async (message, publickey, cmd) => Message.verify(message, publickey, cmd))
 
 if (!process.argv.slice(2).length) {
-  commander.outputHelp();
+  commander.outputHelp()
 
-  process.exit();
+  process.exit()
 }
 
 commander.parse(process.argv)
