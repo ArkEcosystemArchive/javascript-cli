@@ -2,23 +2,94 @@
 
 const commander = require('commander')
 
-const { message, network, wallet } = require('../lib/commands')
+const { message, wallet } = require('../lib/commands')
 
 commander
   .version('1.0.0')
-  .description('CLI for the ARK Blockchain')
-  .command('wallet create').action(() => wallet.create())
-  .command('wallet delegate <username>').action(() => wallet.delegate())
-  .command('wallet send <amount> <recipient>').action(() => wallet.send())
-  .command('wallet stats').action(() => wallet.stats())
-  .command('wallet status <address>').action(() => wallet.status())
-  .command('wallet vanity <string>').action(() => wallet.vanity())
-  .command('wallet vote <username>').action(() => wallet.vote())
-  .command('message sign <message>').action(() => message.sign())
-  .command('message verify <message> <publickey>').action(() => message.verify())
-  .command('connect <network>').action(() => network.connect())
-  .command('connect node <node>').action(() => network.connectNode())
-  .command('disconnect').action(() => network.disconnect())
+  
+commander
+  .command('wallet <address>')
+  .description('Get status for wallet with <address>.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .action(async (address, cmd) => wallet.status(address, cmd))
+ 
+commander
+  .command('create')
+  .description('Create a new wallet.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('--vanity <string>', 'Create a vanity wallet that contains <string>.')
+  .action(async (cmd) => {
+    if(cmd.vanity) {
+      await wallet.vanity(cmd.vanity)
+      return
+    }
+    await wallet.create()
+  })
+  
+commander
+  .command('send <amount> <recepient>')
+  .description('Send <amount> to <recepient>.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --smartbridge <smartbridge>', 'Enter a string for the SmartBridge.')
+  .action(async (amount, recepient, cmd) => wallet.send(amount, recepient, cmd))
+  
+commander
+  .command('vote <delegate>')
+  .description('Vote for <delegate>.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')  
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .action(async (delegate,cmd) => wallet.vote(delegate, cmd))
+  
+commander
+  .command('delegate <username>')
+  .description('Register as delegate with <username>.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')  
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .action(async (username,cmd) => wallet.delegate(username, cmd))
+  
+commander
+  .command('stats')
+  .description('Get the network stats.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')  
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .action(async (cmd) => wallet.delegate(cmd))
+  
+commander
+  .command('sign <msg>')
+  .description('Sign message <msg>.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')  
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .action(async (msg, cmd) => message.sign(msg, cmd))
+  
+commander
+  .command('verify <msg> <publickey>')
+  .description('Verify message <msg> with <publickey>.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')  
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .action(async (msg, publickey, cmd) => message.verify(msg, publickey, cmd))
 
 if (!process.argv.slice(2).length) {
   commander.outputHelp()
