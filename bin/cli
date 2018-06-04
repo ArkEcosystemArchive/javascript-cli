@@ -39,6 +39,8 @@ commander
   .option('-c, --node <node>', 'Connect directly to node <node>.')
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --smartbridge <smartbridge>', 'Enter a string for the SmartBridge.')
   .action(async (amount, recepient, cmd) => wallet.send(amount, recepient, cmd));
   
 commander
@@ -48,6 +50,7 @@ commander
   .option('-c, --node <node>', 'Connect directly to node <node>.')  
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
   .action(async (delegate,cmd) => wallet.vote(delegate, cmd));
   
 commander
@@ -57,6 +60,7 @@ commander
   .option('-c, --node <node>', 'Connect directly to node <node>.')  
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
   .action(async (username,cmd) => wallet.delegate(username, cmd));
   
 commander
@@ -75,6 +79,7 @@ commander
   .option('-c, --node <node>', 'Connect directly to node <node>.')  
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase <passphrase>', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
   .action(async (message, cmd) => message.sign(message, cmd));
   
 commander
