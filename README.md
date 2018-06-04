@@ -1,4 +1,4 @@
-# ARK PHP
+# ARK Client
 
 <p align="center">
     <img src="https://github.com/ArkEcosystem/ARK-Client/blob/develop/banner.png" />
@@ -8,7 +8,7 @@
 
 [![Build Status](https://img.shields.io/travis/ArkEcosystem/ARK-Client/master.svg?style=flat-square)](https://travis-ci.org/ArkEcosystem/ARK-Client)
 [![Latest Version](https://img.shields.io/github/release/ArkEcosystem/ARK-Client.svg?style=flat-square)](https://github.com/ArkEcosystem/ARK-Client/releases)
-[![License](https://img.shields.io/packagist/l/ArkEcosystem/ARK-Client.svg?style=flat-square)](https://packagist.org/packages/ArkEcosystem/ARK-Client)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Installation
 
