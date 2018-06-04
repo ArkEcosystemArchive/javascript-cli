@@ -1,0 +1,29 @@
+#!/usr/bin/env node
+
+const commander = require('commander')
+
+const { message, network, wallet } = require('../lib/commands')
+
+commander
+  .version('1.0.0')
+  .description('CLI for the ARK Blockchain')
+  .command('wallet create').action(() => wallet.create())
+  .command('wallet delegate <username>').action(() => wallet.delegate())
+  .command('wallet send <amount> <recipient>').action(() => wallet.send())
+  .command('wallet stats').action(() => wallet.stats())
+  .command('wallet status <address>').action(() => wallet.status())
+  .command('wallet vanity <string>').action(() => wallet.vanity())
+  .command('wallet vote <username>').action(() => wallet.vote())
+  .command('message sign <message>').action(() => message.sign())
+  .command('message verify <message> <publickey>').action(() => message.verify())
+  .command('connect <network>').action(() => network.connect())
+  .command('connect node <node>').action(() => network.connectNode())
+  .command('disconnect').action(() => network.disconnect())
+
+if (!process.argv.slice(2).length) {
+  commander.outputHelp()
+
+  process.exit()
+}
+
+commander.parse(process.argv)
