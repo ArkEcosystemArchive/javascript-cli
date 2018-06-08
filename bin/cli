@@ -96,12 +96,12 @@ commander
   .action(async (msg, cmd) => message.sign(msg, cmd))
   
 commander
-  .command('verify <msg> <publickey>')
-  .description('Verify message <msg> with <publickey>.')
+  .command('verify <msg> <publickey> <signature>')
+  .description('Verify message <msg> with <signature> which was signed with <publickey>.')
   .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
-  .action(async (msg, publickey, cmd) => message.verify(msg, publickey, cmd))
+  .action(async (msg, publickey, signature, cmd) => message.verify(msg, publickey, signature, cmd))
 
 if (!process.argv.slice(2).length) {
   commander.outputHelp()
