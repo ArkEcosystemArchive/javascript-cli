@@ -56,6 +56,17 @@ commander
   .action(async (delegate,cmd) => wallet.vote(delegate, cmd))
   
 commander
+  .command('unvote')
+  .description('Unvote for the currently voted delegate.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')  
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-i, --interactive', 'Prompt to confirm transaction.')
+  .action(async (delegate,cmd) => wallet.unvote(cmd))
+  
+commander
   .command('delegate <username>')
   .description('Register as delegate with <username>.')
   .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
