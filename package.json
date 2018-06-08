@@ -35,7 +35,8 @@
     "is-url": "^1.2.4",
     "joi": "^13.2.0",
     "pino": "^4.16.1",
-    "ascii-table": "^0.0.9"
+    "ascii-table": "^0.0.9",
+    "prompt": "^1.0.0"
   },
   "devDependencies": {
     "depcheck": "^0.6.9",
