@@ -1,13 +1,13 @@
-# ARK Client
+# ARK JavaScript CLI
 
 <p align="center">
-    <img src="https://github.com/ArkEcosystem/ARK-Client/blob/develop/banner.png" />
+    <img src="https://github.com/ArkEcosystem/ARK-JavaScript-CLI/blob/develop/banner.png" />
 </p>
 
 > A [CLI](https://en.wikipedia.org/wiki/Command-line_interface) for the ARK Blockchain.
 
-[![Build Status](https://img.shields.io/travis/ArkEcosystem/ARK-Client/master.svg?style=flat-square)](https://travis-ci.org/ArkEcosystem/ARK-Client)
-[![Latest Version](https://img.shields.io/github/release/ArkEcosystem/ARK-Client.svg?style=flat-square)](https://github.com/ArkEcosystem/ARK-Client/releases)
+[![Build Status](https://img.shields.io/travis/ArkEcosystem/ARK-JavaScript-CLI/master.svg?style=flat-square)](https://travis-ci.org/ArkEcosystem/ARK-JavaScript-CLI)
+[![Latest Version](https://img.shields.io/github/release/ArkEcosystem/ARK-JavaScript-CLI.svg?style=flat-square)](https://github.com/ArkEcosystem/ARK-JavaScript-CLI/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 ## Installation
