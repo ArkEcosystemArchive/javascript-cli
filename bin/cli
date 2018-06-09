@@ -21,10 +21,10 @@ commander
   .description('Create a new wallet.')
   .option('-n, --network <network>', 'Create a wallet for network: [mainnet|devnet]', 'mainnet')
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
-  .option('--vanity <string>', 'Create a vanity wallet that contains <string>.')
+  .option('--vanity <vanity>', 'Create a vanity wallet that contains lowercase <vanity> (WARNING: this could take a long time).')
   .action(async (cmd) => {
     if(cmd.vanity) {
-      await wallet.vanity(cmd.vanity)
+      await wallet.vanity(cmd)
       return
     }
     await wallet.create(cmd)
