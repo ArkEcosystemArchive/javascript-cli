@@ -19,8 +19,7 @@ commander
 commander
   .command('create')
   .description('Create a new wallet.')
-  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
-  .option('-c, --node <node>', 'Connect directly to node <node>.')
+  .option('-n, --network <network>', 'Create a wallet for network: [mainnet|devnet]', 'mainnet')
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('--vanity <string>', 'Create a vanity wallet that contains <string>.')
@@ -29,7 +28,7 @@ commander
       await wallet.vanity(cmd.vanity)
       return
     }
-    await wallet.create()
+    await wallet.create(cmd)
   })
   
 commander
