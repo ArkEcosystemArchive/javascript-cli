@@ -19,17 +19,15 @@ commander
 commander
   .command('create')
   .description('Create a new wallet.')
-  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
-  .option('-c, --node <node>', 'Connect directly to node <node>.')
+  .option('-n, --network <network>', 'Create a wallet for network: [mainnet|devnet]', 'mainnet')
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
-  .option('-v, --verbose', 'Show verbose logging.')
-  .option('--vanity <string>', 'Create a vanity wallet that contains <string>.')
+  .option('--vanity <vanity>', 'Create a vanity wallet that contains lowercase <vanity> (WARNING: this could take a long time).')
   .action(async (cmd) => {
     if(cmd.vanity) {
-      await wallet.vanity(cmd.vanity)
+      await wallet.vanity(cmd)
       return
     }
-    await wallet.create()
+    await wallet.create(cmd)
   })
   
 commander

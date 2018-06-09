@@ -36,7 +36,8 @@
     "joi": "^13.2.0",
     "pino": "^4.16.1",
     "ascii-table": "^0.0.9",
-    "prompt": "^1.0.0"
+    "prompt": "^1.0.0",
+    "workerpool": "^2.3.0"
   },
   "devDependencies": {
     "depcheck": "^0.6.9",
