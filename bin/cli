@@ -38,6 +38,7 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
   .option('-s, --smartbridge [smartbridge]', 'Enter a string for the SmartBridge.')
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (amount, recepient, cmd) => wallet.send(amount, recepient, cmd))
@@ -50,6 +51,7 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (delegate,cmd) => wallet.vote(delegate, cmd))
   
@@ -61,6 +63,7 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (cmd) => wallet.unvote(cmd))
   
@@ -72,8 +75,33 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (username,cmd) => wallet.delegate(username, cmd))
+  
+commander
+  .command('signature [signature]')
+  .description('Create a second signature.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')  
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
+  .option('-i, --interactive', 'Prompt to confirm transaction.')
+  .action(async (signature,cmd) => wallet.signature(signature, cmd))
+  
+commander
+  .command('multisignature [multisignature]')
+  .description('Create a multisignature.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')  
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
+  .option('-i, --interactive', 'Prompt to confirm transaction.')
+  .action(async (multisignature, cmd) => wallet.multisignature(multisignature, cmd))
   
 commander
   .command('stats')
@@ -91,6 +119,7 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
   .action(async (msg, cmd) => message.sign(msg, cmd))
   
 commander
