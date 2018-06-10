@@ -2,7 +2,7 @@
 
 const commander = require('commander')
 
-const { message, wallet } = require('../lib/commands')
+const { message, wallet, network } = require('../lib/commands')
 
 commander
   .version('1.0.0')
@@ -82,7 +82,7 @@ commander
   .option('-c, --node <node>', 'Connect directly to node <node>.')  
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
-  .action(async (cmd) => wallet.delegate(cmd))
+  .action(async (cmd) => network.stats(cmd))
   
 commander
   .command('sign <msg>')
