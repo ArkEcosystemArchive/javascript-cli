@@ -15,6 +15,16 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .action(async (address, cmd) => wallet.status(address, cmd))
+  
+commander
+  .command('address')
+  .description('Get the address that is derived from a passphrase.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .option('-p, --passphrase [passphrase]', 'Enter the passphrase, if you do not enter e passphrase you will be prompted for it.')
+  .action(async (cmd) => wallet.address(cmd))
  
 commander
   .command('create')
