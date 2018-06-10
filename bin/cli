@@ -39,7 +39,7 @@ commander
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
   .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
-  .option('-s, --smartbridge [smartbridge]', 'Enter a string for the SmartBridge.')
+  .option('-b, --smartbridge [smartbridge]', 'Enter a string for the SmartBridge.')
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (amount, recepient, cmd) => wallet.send(amount, recepient, cmd))
   
@@ -87,7 +87,7 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
-  .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
+  //.option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (signature,cmd) => wallet.signature(signature, cmd))
   
