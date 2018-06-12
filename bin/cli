@@ -5,7 +5,7 @@ const commander = require('commander')
 const { message, wallet, network } = require('../lib/commands')
 
 commander
-  .version('1.0.0')
+  .version('2.0.0')
   
 commander
   .command('wallet <address>')
@@ -15,7 +15,16 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .action(async (address, cmd) => wallet.status(address, cmd))
-  
+
+commander
+  .command('ledger')
+  .description('Get status for the wallet(s) on a connected Ledger device.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .action(async (cmd) => wallet.ledger(cmd))
+    
 commander
   .command('address')
   .description('Get the address that is derived from a passphrase.')
