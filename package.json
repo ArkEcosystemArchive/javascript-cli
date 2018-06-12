@@ -8,9 +8,10 @@
     "lite",
     "cli"
   ],
-  "version": "0.0.1",
+  "version": "2.0.0",
   "contributors": [
-    "Brian Faust <brian@ark.io>"
+    "Brian Faust <brian@ark.io>",
+    "Marc Schot <marc@cryptology.hk>"
   ],
   "license": "MIT",
   "bin": {
