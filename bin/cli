@@ -97,7 +97,6 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
-  .option('-l, --ledger', 'Use your Ledger device instead of a passphrase.')
   .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (username,cmd) => wallet.delegate(username, cmd))
