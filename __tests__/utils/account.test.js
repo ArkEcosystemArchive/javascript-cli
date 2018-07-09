@@ -14,7 +14,7 @@ describe('account.getAccountFromSeed', () => {
     expect(account.getAccountFromSeed).toBeFunction()
   })
 
-  it('should return a valid ARK account object for a seed and networkVersion 23', () => {
+  it('should return a valid ARK account object for a seed and networkVersion <23>', () => {
     const networkVersion = 23
     const seed = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
     const addressObject = {
@@ -27,7 +27,7 @@ describe('account.getAccountFromSeed', () => {
     expect(account.getAccountFromSeed(seed, networkVersion)).toMatchObject(addressObject)
   })
 
-  it('should return a valid DARK account object for a seed and networkVersion 30', () => {
+  it('should return a valid DARK account object for a seed and networkVersion <30>', () => {
     const networkVersion = 30
     const seed = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
     const addressObject = {
@@ -85,7 +85,7 @@ describe('account.isValidDelegate', () => {
     expect(account.isValidDelegate).toBeFunction()
   })
 
-  it('should retrieve a delegate object for a known username', async () => {
+  it('should retrieve a delegate object for a known <username>', async () => {
     await mainnet.initNetwork()
     const username = 'arkpool'
     const delegate = await account.isValidDelegate(mainnet.network, username)
@@ -95,7 +95,7 @@ describe('account.isValidDelegate', () => {
 
   it('should throw an Error when a delegate with <username> does not exist', async () => {
     await mainnet.initNetwork()
-    const username = 'notAValidDelegate' // arbitrary address from the explorer top-wallets
+    const username = 'notAValidDelegate' 
     let error = null
     try {
       await account.isValidDelegate(mainnet.network, username)
