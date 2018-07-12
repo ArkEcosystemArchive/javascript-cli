@@ -95,7 +95,7 @@ describe('account.isValidDelegate', () => {
 
   it('should throw an Error when a delegate with <username> does not exist', async () => {
     await mainnet.initNetwork()
-    const username = 'notAValidDelegate' 
+    const username = 'notAValidDelegate'
     let error = null
     try {
       await account.isValidDelegate(mainnet.network, username)
