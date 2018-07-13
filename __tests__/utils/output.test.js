@@ -3,8 +3,8 @@
 const output = require('../../lib/utils/output.js')
 
 describe('output', () => {
-  it('should be defined', () => {
-    expect(output).toBeDefined()
+  it('should be an object', () => {
+    expect(output).toBeObject()
   })
 })
 
