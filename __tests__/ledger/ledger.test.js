@@ -4,8 +4,8 @@ const ledger = require('../../lib/ledger/ledger.js')
 const mainnet = require('../__support__/mainnet.js')
 
 describe('ledger', () => {
-  it('should be defined', () => {
-    expect(ledger).toBeDefined()
+  it('should be an object', () => {
+    expect(ledger).toBeObject()
   })
 })
 
