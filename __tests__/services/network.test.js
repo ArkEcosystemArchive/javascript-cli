@@ -190,20 +190,20 @@ describe('network.__getRandomPeer', () => {
   it('should be a function', () => {
     expect(network.__getRandomPeer).toBeFunction()
   })
-  
-  it('should return false if no network is set', async() => {
+
+  it('should return false if no network is set', async () => {
     if (typeof (network.network) !== 'undefined') {
       delete network.network
     }
-    
+
     const result = await network.__getRandomPeer()
     expect(result).toBeFalse()
   })
-  
-   it('should return a string when a valid network is set', async() => {
+
+   it('should return a string when a valid network is set', async () => {
     const net = 'mainnet'
     await network.setNetwork(net)
-    
+
     const result = await network.__getRandomPeer()
     expect(result).toBeString()
   })
