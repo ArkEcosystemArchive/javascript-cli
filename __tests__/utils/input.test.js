@@ -3,8 +3,8 @@
 const input = require('../../lib/utils/input.js')
 
 describe('input', () => {
-  it('should be defined', () => {
-    expect(input).toBeDefined()
+  it('should be an object', () => {
+    expect(input).toBeObject()
   })
 })
 

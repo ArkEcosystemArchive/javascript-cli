@@ -4,8 +4,8 @@ const account = require('../../lib/utils/account.js')
 const mainnet = require('../__support__/mainnet.js')
 
 describe('account', () => {
-  it('should be defined', () => {
-    expect(account).toBeDefined()
+  it('should be an object', () => {
+    expect(account).toBeObject()
   })
 })
 
