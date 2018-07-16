@@ -93,6 +93,10 @@ ark devnet> account status DMUeELFkFtN5obvStkV9Zt44GEjEaYgKhH
   productivity: 0 }
 ```
 
+## Security
+
+If you discover a security vulnerability within this application, please send an e-mail to security@ark.io. All security vulnerabilities will be promptly addressed.
+
 # License
 
 **MIT License**
