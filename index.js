@@ -873,7 +873,7 @@ vorpal
 vorpal
   .command('account send <amount> <address>', 'Send <amount> ark to <address>. <amount> format examples: 10, USD10.4, EUR100')
   .action(function(args, callback) {
-		var self = this;
+    var self = this;
     if(!isConnected()){
       self.log("please connect to node or network before");
       return callback();
@@ -987,7 +987,7 @@ vorpal
 vorpal
   .command('account delegate <username>', 'Register new delegate with <username> ')
   .action(function(args, callback) {
-		var self = this;
+    var self = this;
     if(!isConnected()){
       self.log("please connect to node or network before");
       return callback();
@@ -1051,7 +1051,7 @@ vorpal
 vorpal
   .command('account create', 'Generate a new random cold account')
   .action(function(args, callback) {
-		var self = this;
+    var self = this;
     if(!isConnected()){
       self.log("please connect to node or network before, in order to retrieve necessery information about address prefixing");
       return callback();
@@ -1107,7 +1107,7 @@ vorpal
 vorpal
   .command('message sign <message>', 'Sign a message')
   .action(function(args, callback) {
-		var self = this;
+    var self = this;
     return this.prompt({
       type: 'password',
       name: 'passphrase',
@@ -1130,7 +1130,7 @@ vorpal
 vorpal
   .command('message verify <message> <publickey>', 'Verify the <message> signed by the owner of <publickey> (you will be prompted to provide the signature)')
   .action(function(args, callback) {
-		var self = this;
+    var self = this;
     return this.prompt({
       type: 'input',
       name: 'signature',
@@ -1162,7 +1162,7 @@ var sharkspinner;
 vorpal
   .command("shARK", "No you don't want to use this command")
   .action(function(args, callback) {
-		var self = this;
+    var self = this;
     self.log(colors.red(figlet.textSync("shARK")));
     sharkspinner = ora({text:"Watch out, the shARK attack!",spinner:"shark"}).start();
     callback();
