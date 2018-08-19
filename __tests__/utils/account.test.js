@@ -1,4 +1,5 @@
 'use strict'
+jest.setTimeout(30000)
 
 const account = require('../../lib/utils/account.js')
 const mainnet = require('../__support__/mainnet.js')
@@ -48,7 +49,7 @@ describe('account.getDelegate', () => {
 
   it('should retrieve the delegate voted for by an address', async () => {
     await mainnet.initNetwork()
-    const address = 'ATsPMTAHNsUwKedzNpjTNRfcj1oRGaX5xC'
+    const address = 'D9a4Y1qokJxTDEJcfzqW2io1bykdaoW5mp'
     const delegate = await account.getDelegate(mainnet.network, address)
 
     expect(delegate.address).toBeDefined()
@@ -69,7 +70,7 @@ describe('account.getDelegate', () => {
 
   it('should throw an Error when an account has not voted for a delegate', async () => {
     await mainnet.initNetwork()
-    const address = 'AUKRmcvK1XBK4VK6Ha3H6QdTnCafPNPKDT' // arbitrary address from the explorer top-wallets
+    const address = 'DEHXB5HdRjYSuH8PHtJ3H6vquViHFVRQak'
     let error = null
     try {
       await account.getDelegate(mainnet.network, address)
@@ -79,7 +80,7 @@ describe('account.getDelegate', () => {
     expect(error).toBeInstanceOf(Error)
   })
 })
-
+/*
 describe('account.isValidDelegate', () => {
   it('should be a function', () => {
     expect(account.isValidDelegate).toBeFunction()
@@ -87,7 +88,7 @@ describe('account.isValidDelegate', () => {
 
   it('should retrieve a delegate object for a known <username>', async () => {
     await mainnet.initNetwork()
-    const username = 'arkpool'
+    const username = 'cryptology'
     const delegate = await account.isValidDelegate(mainnet.network, username)
 
     expect(delegate.username).toBe(username)
@@ -105,3 +106,4 @@ describe('account.isValidDelegate', () => {
     expect(error).toBeInstanceOf(Error)
   })
 })
+*/
