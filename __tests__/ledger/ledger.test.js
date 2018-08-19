@@ -1,4 +1,5 @@
 'use strict'
+jest.setTimeout(30000)
 
 const ledger = require('../../lib/ledger/ledger.js')
 const mainnet = require('../__support__/mainnet.js')
