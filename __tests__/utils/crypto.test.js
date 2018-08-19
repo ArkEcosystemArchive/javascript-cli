@@ -13,20 +13,20 @@ describe('crypto.sign', () => {
   })
 
   it('should correctly sign a message', () => {
-    const msg = 'Point. Click. Blockchain.'
-    const passphrase = 'candy maple cake sugar pudding cream honey rich smooth crumble sweet treat'
+    const message = 'Hello World'
+    const passphrase = 'this is a top secret passphrase'
     const networkVersion = 30 // devnet
-    const publicKey = '03e734aba4bc673b5c106bd90dfb7fe19a2faf32aa0a4a40d62ddda9d41ab239e4'
-    const address = 'DEHXB5HdRjYSuH8PHtJ3H6vquViHFVRQak'
-    const signature = '304402202a50bc620e7f97a2e1d416ddca79988bbb8232f4428a9fddd5a187dd3c11462b022078355bf458fbd9aa1842bf119afa3f686027fcc724d9bb73b66b234e0d51066e'
+    const publicKey = '034151a3ec46b5670a682b0a63394f863587d1bc97483b1b6c70eb58e7f0aed192'
+    const address = 'D61mfSggzbvQgTUe6JhYKH2doHaqJ3Dyib'
+    const signature = '304402200fb4adddd1f1d652b544ea6ab62828a0a65b712ed447e2538db0caebfa68929e02205ecb2e1c63b29879c2ecf1255db506d671c8b3fa6017f67cfd1bf07e6edd1cc8'
 
-    const result = crypto.sign(msg, passphrase, networkVersion)
+    const result = crypto.sign(message, passphrase, networkVersion)
     expect(result).toBeObject()
     expect(result).toContainKeys(['publicKey', 'address', 'signature', 'message'])
     expect(result.publicKey).toBe(publicKey)
     expect(result.address).toBe(address)
     expect(result.signature).toBe(signature)
-    expect(result.message).toBe(msg)
+    expect(result.message).toBe(message)
   })
 })
 
@@ -36,11 +36,11 @@ describe('crypto.verify', () => {
   })
 
   it('should correctly verify a message', () => {
-    const msg = 'Point. Click. Blockchain.'
-    const signature = '304402202a50bc620e7f97a2e1d416ddca79988bbb8232f4428a9fddd5a187dd3c11462b022078355bf458fbd9aa1842bf119afa3f686027fcc724d9bb73b66b234e0d51066e'
-    const publicKey = '03e734aba4bc673b5c106bd90dfb7fe19a2faf32aa0a4a40d62ddda9d41ab239e4'
+    const message = 'Hello World'
+    const signature = '304402200fb4adddd1f1d652b544ea6ab62828a0a65b712ed447e2538db0caebfa68929e02205ecb2e1c63b29879c2ecf1255db506d671c8b3fa6017f67cfd1bf07e6edd1cc8'
+    const publicKey = '034151a3ec46b5670a682b0a63394f863587d1bc97483b1b6c70eb58e7f0aed192'
 
-    const result = crypto.verify(msg, signature, publicKey)
+    const result = crypto.verify(message, signature, publicKey)
     expect(result).toBeTrue()
 
     const badMsg = 'Will not verify'
