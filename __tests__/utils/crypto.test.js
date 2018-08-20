@@ -48,3 +48,22 @@ describe('crypto.verify', () => {
     expect(badResult).toBeFalse()
   })
 })
+
+describe('crypt.getAddress', () => {
+  it('should be a function', () => {
+    expect(crypto.getAddress).toBeFunction()
+  })
+
+  it('should correctly generate an address from a passphrase', () => {
+    const passphrase = 'this is a top secret passphrase'
+    const networkVersion = 30 // devnet
+    const publicKey = '034151a3ec46b5670a682b0a63394f863587d1bc97483b1b6c70eb58e7f0aed192'
+    const address = 'D61mfSggzbvQgTUe6JhYKH2doHaqJ3Dyib'
+
+    const result = crypto.getAddress(passphrase, networkVersion)
+    expect(result).toBeObject()
+    expect(result).toContainKeys(['publicKey', 'address'])
+    expect(result.publicKey).toBe(publicKey)
+    expect(result.address).toBe(address)
+  })
+})
