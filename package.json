@@ -24,10 +24,12 @@
     "depcheck": "depcheck ./"
   },
   "dependencies": {
+    "@arkecosystem/crypto": "^0.1.2",
     "arkjs": "github:arkecosystem/ark-js#master",
     "ascii-table": "^0.0.9",
     "axios": "^0.18.0",
     "bip39": "^2.5.0",
+    "browserify-bignum": "^1.3.0-2",
     "bs58check": "^2.1.2",
     "chalk": "^2.4.1",
     "figlet": "^1.2.0",
