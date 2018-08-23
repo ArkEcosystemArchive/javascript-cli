@@ -49,7 +49,7 @@ describe('crypto.verify', () => {
   })
 })
 
-describe('crypt.getAddress', () => {
+describe('crypto.getAddress', () => {
   it('should be a function', () => {
     expect(crypto.getAddress).toBeFunction()
   })
@@ -65,5 +65,22 @@ describe('crypt.getAddress', () => {
     expect(result).toContainKeys(['publicKey', 'address'])
     expect(result.publicKey).toBe(publicKey)
     expect(result.address).toBe(address)
+  })
+})
+
+describe('crypto.registerDelegate', () => {
+  it('should be a function', () => {
+    expect(crypto.registerDelegate).toBeFunction()
+  })
+
+  it('should create a valid transaction', () => {
+    const username = 'testdelegate'
+    const passphrase = 'this is a top secret passphrase'
+    const secondSecret = null
+    const fee = 1000
+    const transaction = crypto.registerDelegate(username, passphrase, secondSecret, fee)
+
+    expect(transaction).toContainKeys(['asset', 'fee', 'id', 'senderPublicKey', 'signature', 'type', 'timestamp'])
+    expect(transaction.asset.delegate.username).toBe(username)
   })
 })
