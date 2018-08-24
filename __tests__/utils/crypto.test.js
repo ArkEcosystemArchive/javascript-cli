@@ -84,3 +84,39 @@ describe('crypto.registerDelegate', () => {
     expect(transaction.asset.delegate.username).toBe(username)
   })
 })
+
+describe('crypto.createTransaction', () => {
+  it('should be a function', () => {
+    expect(crypto.createTransaction).toBeFunction()
+  })
+
+  it('should create a valid transaction', () => {
+    const recepient = 'D61mfSggzbvQgTUe6JhYKH2doHaqJ3Dyib'
+    const amount = 100000000
+    const vendorField = 'Hello World'
+    const passphrase = 'this is a top secret passphrase'
+    const secondSecret = null
+    const fee = 1000
+    const transaction = crypto.createTransaction(recepient, amount, vendorField, passphrase, secondSecret, fee)
+
+    expect(transaction).toContainKeys(['amount', 'fee', 'id', 'recipientId', 'senderPublicKey', 'signature', 'type', 'vendorField'])
+  })
+})
+
+describe('crypto.getTransactionId', () => {
+  it('should be a function', () => {
+    expect(crypto.getTransactionId).toBeFunction()
+  })
+
+  it('should create a valid transaction', () => {
+    const recepient = 'D61mfSggzbvQgTUe6JhYKH2doHaqJ3Dyib'
+    const amount = 100000000
+    const vendorField = 'Hello World'
+    const passphrase = 'this is a top secret passphrase'
+    const secondSecret = null
+    const fee = 1000
+    const transaction = crypto.createTransaction(recepient, amount, vendorField, passphrase, secondSecret, fee)
+    const transactionId = crypto.getTransactionId(transaction)
+    expect(transactionId).toBe(transaction.id)
+  })
+})
