@@ -97,6 +97,7 @@ commander
   .option('-v, --verbose', 'Show verbose logging.')
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
   .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
+  .option('--fee [fee]', 'Specify a dynamic fee in Arktoshis. Defaults to 2500000000 = 25 ARK.' )
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (username,cmd) => wallet.delegate(username, cmd))
   
