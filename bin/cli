@@ -2,7 +2,7 @@
 
 const commander = require('commander')
 
-const { message, wallet, network } = require('../lib/commands')
+const { message, wallet, network, transaction } = require('../lib/commands')
 
 commander
   .version('2.0.0')
@@ -58,6 +58,7 @@ commander
   .option('-l, --ledger', 'Use your Ledger device instead of a passphrase.')
   .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
   .option('-b, --smartbridge [smartbridge]', 'Enter a string for the SmartBridge.')
+  .option('--fee [fee]', 'Specify a dynamic fee in Arktoshis. Defaults to 10000000 = 0.1 ARK.' )
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (amount, recepient, cmd) => wallet.send(amount, recepient, cmd))
   
@@ -149,6 +150,15 @@ commander
   .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
   .option('-v, --verbose', 'Show verbose logging.')
   .action(async (msg, publicKey, signature, cmd) => message.verify(msg, publicKey, signature, cmd))
+  
+commander
+  .command('transaction <transactionId>')
+  .description('Get status for transaction with <transactionId>.')
+  .option('-n, --network <network>', 'Connect to network: [mainnet|devnet]', 'mainnet')
+  .option('-c, --node <node>', 'Connect directly to node <node>.')
+  .option('-f, --format <format>', 'Specify how to format the output [json|table]', 'json')
+  .option('-v, --verbose', 'Show verbose logging.')
+  .action(async (transactionId, cmd) => transaction.status(transactionId, cmd))
 
 if (!process.argv.slice(2).length) {
   commander.outputHelp()
