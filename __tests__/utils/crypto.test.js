@@ -120,16 +120,16 @@ describe('crypto.createVoteTransaction', () => {
   })
 })
 
-describe('crypto.createignatureTransaction', () => {
+describe('crypto.createSignatureTransaction', () => {
   it('should be a function', () => {
-    expect(crypto.createignatureTransaction).toBeFunction()
+    expect(crypto.createSignatureTransaction).toBeFunction()
   })
 
   it('should create a valid transaction', () => {
     const passphrase = 'this is a top secret passphrase'
     const secondSecret = 'test secret'
     const fee = 1000
-    const transaction = crypto.createignatureTransaction(passphrase, secondSecret, fee)
+    const transaction = crypto.createSignatureTransaction(passphrase, secondSecret, fee)
 
     expect(transaction).toContainKeys(['fee', 'id', 'senderPublicKey', 'signature', 'type', 'asset'])
     expect(transaction.asset.signature).toContainKey('publicKey')
