@@ -72,6 +72,7 @@ commander
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
   .option('-l, --ledger', 'Use your Ledger device instead of a passphrase.')
   .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
+  .option('--fee [fee]', 'Specify a dynamic fee in Arktoshis. Defaults to 100000000 = 1 ARK.' )
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (delegate,cmd) => wallet.vote(delegate, cmd))
   
@@ -85,6 +86,7 @@ commander
   .option('-p, --passphrase [passphrase]', 'Enter your passphrase, if you do not enter e passphrase you will be prompted for it.')
   .option('-l, --ledger', 'Use your Ledger device instead of a passphrase.')
   .option('-s, --signature [signature]', 'Enter your second signature, if you do not enter one you will be prompted for it.')
+  .option('--fee [fee]', 'Specify a dynamic fee in Arktoshis. Defaults to 100000000 = 1 ARK.' )
   .option('-i, --interactive', 'Prompt to confirm transaction.')
   .action(async (cmd) => wallet.unvote(cmd))
   

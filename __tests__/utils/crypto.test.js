@@ -103,6 +103,23 @@ describe('crypto.createTransaction', () => {
   })
 })
 
+describe('crypto.createVoteTransaction', () => {
+  it('should be a function', () => {
+    expect(crypto.createVoteTransaction).toBeFunction()
+  })
+
+  it('should create a valid transaction', () => {
+    const publicKey = '034151a3ec46b5670a682b0a63394f863587d1bc97483b1b6c70eb58e7f0aed192'
+    const passphrase = 'this is a top secret passphrase'
+    const secondSecret = null
+    const fee = 1000
+    const transaction = crypto.createVoteTransaction(publicKey, passphrase, secondSecret, fee, false)
+
+    expect(transaction).toContainKeys(['fee', 'id', 'senderPublicKey', 'signature', 'type', 'asset'])
+    expect(transaction.asset.votes[0]).toBe(`+${publicKey}`)
+  })
+})
+
 describe('crypto.getTransactionId', () => {
   it('should be a function', () => {
     expect(crypto.getTransactionId).toBeFunction()
