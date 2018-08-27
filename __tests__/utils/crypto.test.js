@@ -68,6 +68,21 @@ describe('crypto.getAddress', () => {
   })
 })
 
+describe('crypto.getAddressFromPublicKey', () => {
+  it('should be a function', () => {
+    expect(crypto.getAddressFromPublicKey).toBeFunction()
+  })
+
+  it('should correctly generate an address from a publicKey', () => {
+    const networkVersion = 30 // devnet
+    const publicKey = '034151a3ec46b5670a682b0a63394f863587d1bc97483b1b6c70eb58e7f0aed192'
+    const address = 'D61mfSggzbvQgTUe6JhYKH2doHaqJ3Dyib'
+
+    const result = crypto.getAddressFromPublicKey(publicKey, networkVersion)
+    expect(result).toBe(address)
+  })
+})
+
 describe('crypto.registerDelegate', () => {
   it('should be a function', () => {
     expect(crypto.registerDelegate).toBeFunction()
@@ -151,5 +166,23 @@ describe('crypto.getTransactionId', () => {
     const transaction = crypto.createTransaction(recepient, amount, vendorField, passphrase, secondSecret, fee)
     const transactionId = crypto.getTransactionId(transaction)
     expect(transactionId).toBe(transaction.id)
+  })
+})
+
+describe('crypto.getTransactionBytesHex', () => {
+  it('should be a function', () => {
+    expect(crypto.getTransactionBytesHex).toBeFunction()
+  })
+
+  it('should return a transaction in HEX', () => {
+    const recepient = 'D61mfSggzbvQgTUe6JhYKH2doHaqJ3Dyib'
+    const amount = 100000000
+    const vendorField = 'Hello World'
+    const passphrase = 'this is a top secret passphrase'
+    const secondSecret = null
+    const fee = 1000
+    const transaction = crypto.createTransaction(recepient, amount, vendorField, passphrase, secondSecret, fee)
+    const result = crypto.getTransactionBytesHex(transaction)
+    expect(result).toBeString()
   })
 })
