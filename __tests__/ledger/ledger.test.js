@@ -1,8 +1,6 @@
 'use strict'
-jest.setTimeout(30000)
 
 const ledger = require('../../lib/ledger/ledger.js')
-const mainnet = require('../__support__/mainnet.js')
 
 describe('ledger', () => {
   it('should be an object', () => {
@@ -13,27 +11,6 @@ describe('ledger', () => {
 describe('ledger.setNetwork', () => {
   it('should be a function', () => {
     expect(ledger.setNetwork).toBeFunction()
-  })
-
-  it('should return a defined object for an existing network', async () => {
-    await mainnet.initNetwork()
-    expect(ledger.setNetwork(mainnet.network)).toBeDefined()
-  })
-
-  it('should throw Error for a badly formatted network', async () => {
-    let badNetwork = {
-      network: 'hasNetWorkButNoVersion'
-    }
-    expect(() => {
-      ledger.setNetwork(badNetwork)
-    }).toThrow()
-
-    badNetwork = {
-      noNetwork: 'hasNoNetWorkAndNoVersion'
-    }
-    expect(() => {
-      ledger.setNetwork(badNetwork)
-    }).toThrow()
   })
 })
 

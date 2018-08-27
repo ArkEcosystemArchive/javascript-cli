@@ -1,8 +1,6 @@
 'use strict'
-jest.setTimeout(30000)
 
 const account = require('../../lib/utils/account.js')
-const mainnet = require('../__support__/mainnet.js')
 
 describe('account', () => {
   it('should be an object', () => {
@@ -46,64 +44,10 @@ describe('account.getDelegate', () => {
   it('should be a function', () => {
     expect(account.getDelegate).toBeFunction()
   })
-
-  it('should retrieve the delegate voted for by an address', async () => {
-    await mainnet.initNetwork()
-    const address = 'D9a4Y1qokJxTDEJcfzqW2io1bykdaoW5mp'
-    const delegate = await account.getDelegate(mainnet.network, address)
-
-    expect(delegate.address).toBeDefined()
-    expect(delegate.username).toBeDefined()
-  })
-
-  it('should throw an Error for unvalid address input', async () => {
-    await mainnet.initNetwork()
-    const address = 'NotAValidAddress'
-    let error = null
-    try {
-      await account.getDelegate(mainnet.network, address)
-    } catch (err) {
-      error = err
-    }
-    expect(error).toBeInstanceOf(Error)
-  })
-
-  it('should throw an Error when an account has not voted for a delegate', async () => {
-    await mainnet.initNetwork()
-    const address = 'DEHXB5HdRjYSuH8PHtJ3H6vquViHFVRQak'
-    let error = null
-    try {
-      await account.getDelegate(mainnet.network, address)
-    } catch (err) {
-      error = err
-    }
-    expect(error).toBeInstanceOf(Error)
-  })
 })
-/*
+
 describe('account.isValidDelegate', () => {
   it('should be a function', () => {
     expect(account.isValidDelegate).toBeFunction()
   })
-
-  it('should retrieve a delegate object for a known <username>', async () => {
-    await mainnet.initNetwork()
-    const username = 'cryptology'
-    const delegate = await account.isValidDelegate(mainnet.network, username)
-
-    expect(delegate.username).toBe(username)
-  })
-
-  it('should throw an Error when a delegate with <username> does not exist', async () => {
-    await mainnet.initNetwork()
-    const username = 'notAValidDelegate'
-    let error = null
-    try {
-      await account.isValidDelegate(mainnet.network, username)
-    } catch (err) {
-      error = err
-    }
-    expect(error).toBeInstanceOf(Error)
-  })
 })
-*/
