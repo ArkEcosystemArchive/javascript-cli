@@ -18,7 +18,7 @@ jobs:
           command: yarn global add node-gyp
       - run:
           name: Install HID packages
-          command: yarn install node-hid --build-from-source
+          command: yarn add node-hid --build-from-source
       - run:
           name: Install packages
           command: yarn install
