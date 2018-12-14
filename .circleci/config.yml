@@ -32,9 +32,6 @@ jobs:
       - run:
           name: Lint
           command: yarn lint
-      - run:
-          name: Depcheck
-          command: yarn depcheck
 
 workflows:
   version: 2
