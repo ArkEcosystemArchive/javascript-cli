@@ -1,6 +1,6 @@
 {
   "name": "@arkecosystem/cli",
-  "description": "CLI for the ARK Blockchain",
+  "description": "CLI for the Ark Blockchain",
   "keywords": [
     "ark",
     "blockchain",
@@ -20,8 +20,7 @@
   "scripts": {
     "test": "jest --forceExit",
     "test:watch": "jest --watch",
-    "lint": "eslint ./ --fix",
-    "depcheck": "depcheck ./"
+    "lint": "eslint ./ --fix"
   },
   "dependencies": {
     "@arkecosystem/crypto": "^0.1.2",
@@ -41,7 +40,6 @@
     "workerpool": "^2.3.1"
   },
   "devDependencies": {
-    "depcheck": "^0.6.9",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^11.0.0",
     "eslint-plugin-import": "^2.12.0",
