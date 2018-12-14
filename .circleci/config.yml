@@ -1,7 +1,7 @@
 version: 2
 jobs:
   test-node-9:
-    working_directory: ~/new-desktop-wallet
+    working_directory: ~/javascript-cli
     docker:
       - image: circleci/node:9.11-browsers
     steps:
