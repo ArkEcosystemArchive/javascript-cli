@@ -1,7 +1,7 @@
 # ARK JavaScript CLI
 
 <p align="center">
-    <img src="https://github.com/ArkEcosystem/ARK-JavaScript-CLI/blob/develop/banner.png" />
+    <img src="./banner.png" />
 </p>
 
 > A [CLI](https://en.wikipedia.org/wiki/Command-line_interface) for the ARK Blockchain.
