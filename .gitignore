@@ -51,6 +51,3 @@ bundle.min.js
 
 # Build
 dist
-
-#Lock files
-.lock
