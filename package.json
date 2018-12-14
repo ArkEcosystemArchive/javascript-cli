@@ -1,15 +1,6 @@
 {
-  "name": "ark-client",
-  "version": "1.0.0",
-  "description": "Command Line Interface to Ark blockchain",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https:/:github.com/arkecosystem/ark-client.git"
-  },
+  "name": "@arkecosystem/cli",
+  "description": "CLI for the ARK Blockchain",
   "keywords": [
     "ark",
     "blockchain",
@@ -17,32 +8,61 @@
     "lite",
     "cli"
   ],
-  "bin": {
-    "ark-client": "index.js"
-  },
-  "author": "fx.thoorens@ark.io",
+  "version": "2.0.0",
+  "contributors": [
+    "Brian Faust <brian@ark.io>",
+    "Marc Schot <marc@cryptology.hk>"
+  ],
   "license": "MIT",
+  "bin": {
+    "ark:cli": "./bin/cli"
+  },
+  "scripts": {
+    "test": "jest --forceExit",
+    "test:watch": "jest --watch",
+    "lint": "eslint ./ --fix",
+    "depcheck": "depcheck ./"
+  },
   "dependencies": {
-    "arkjs": "github:arkecosystem/ark-js#master",
-    "ascii-table": "0.0.9",
-    "asciichart": "^0.1.7",
-    "async": "^2.1.5",
-    "bip39": "^2.2.0",
-    "blessed": "^0.1.81",
-    "blessed-contrib": "^4.7.5",
-    "chart": "github:jstrace/chart",
-    "cli-colors": "0.0.2",
-    "cli-spinners": "^1.0.0",
-    "clui": "^0.3.1",
-    "colors": "^1.1.2",
-    "cowsay": "^1.1.9",
+    "@arkecosystem/crypto": "^0.1.2",
+    "ascii-table": "^0.0.9",
+    "axios": "^0.18.0",
+    "bs58check": "^2.1.2",
+    "chalk": "^2.4.1",
     "figlet": "^1.2.0",
-    "le-table": "^6.1.4",
+    "is-reachable": "^2.4.0",
+    "is-url": "^1.2.4",
+    "joi": "^13.2.0",
     "ledgerco": "github:ledgerhq/ledger-node-js-api#6cde5978b9d0a4922f0d33520b16cc2184559ebc",
+    "lodash": "^4.17.10",
     "ora": "^1.1.0",
-    "q": "^1.5.0",
-    "request": "^2.79.0",
-    "request-promise-native": "^1.0.4",
-    "vorpal": "^1.11.4"
+    "pino": "^4.16.1",
+    "prompt": "^1.0.0",
+    "workerpool": "^2.3.1"
+  },
+  "devDependencies": {
+    "depcheck": "^0.6.9",
+    "eslint": "^4.19.1",
+    "eslint-config-standard": "^11.0.0",
+    "eslint-plugin-import": "^2.12.0",
+    "eslint-plugin-node": "^6.0.1",
+    "eslint-plugin-promise": "^3.8.0",
+    "eslint-plugin-standard": "^3.1.0",
+    "husky": "^0.14.3",
+    "jest": "^23.3.0",
+    "jest-extended": "^0.7.2",
+    "lint-staged": "^7.1.3",
+    "regenerator-runtime": "^0.11.1",
+    "standard": "^11.0.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix"
+    ]
   }
 }
