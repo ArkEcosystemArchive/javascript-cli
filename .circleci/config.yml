@@ -29,9 +29,6 @@ jobs:
       - run:
           name: Test
           command: yarn test
-      - run:
-          name: Lint
-          command: yarn lint
 workflows:
   version: 2
   test:
