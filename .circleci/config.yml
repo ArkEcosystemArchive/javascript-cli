@@ -3,14 +3,14 @@ jobs:
   test-node-9:
     working_directory: ~/javascript-cli
     docker:
-      - image: circleci/node:9.11-browsers
+      - image: circleci/node:9.11.1-stretch-browsers
     steps:
       - checkout
       - run:
           name: Install required packages
           command: |
             sudo apt-get update
-            sudo apt-get -t jessie-backports install libudev-dev libusb-1.0-0-dev
+            sudo apt-get install libudev-dev libusb-1.0-0-dev
       - restore_cache:
           key: dependency-cache-{{ checksum "yarn.lock" }}
       - run:
