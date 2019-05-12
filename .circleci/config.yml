@@ -3,7 +3,7 @@ jobs:
   test-node-9:
     working_directory: ~/javascript-cli
     docker:
-      - image: circleci/node:9.11-browsers
+      - image: circleci/node:9.11.1-stretch-browsers
     steps:
       - checkout
       - run:
