@@ -17,7 +17,9 @@ yarn add arkecosystem/javascript-cli
 ```
 
 ## Dependencies
+
 Before running the yarn command you will need the following packages installed:
+
 - [Yarn](https://yarnpkg.com/en/docs/install)
 - [Node](https://nodejs.org/en/download/)
 - [Python](https://www.python.org/downloads/)
