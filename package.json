@@ -33,7 +33,7 @@
     "is-url": "^1.2.4",
     "joi": "^13.2.0",
     "ledgerco": "github:ledgerhq/ledger-node-js-api#6cde5978b9d0a4922f0d33520b16cc2184559ebc",
-    "lodash": "^4.17.10",
+    "lodash": "^4.17.13",
     "ora": "^1.1.0",
     "pino": "^4.16.1",
     "prompt": "^1.0.0",
