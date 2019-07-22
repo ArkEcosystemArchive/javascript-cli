@@ -10,6 +10,8 @@
 [![Latest Version](https://img.shields.io/github/release/ArkEcosystem/ARK-JavaScript-CLI.svg?style=flat-square)](https://github.com/ArkEcosystem/ARK-JavaScript-CLI/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
+> Lead Maintainer: [Brian Faust](https://github.com/faustbrian)
+
 ## Installation
 
 ```bash
@@ -30,9 +32,8 @@ If you discover a security vulnerability within this package, please send an e-m
 
 ## Credits
 
-- [Brian Faust](https://github.com/faustbrian)
-- [All Contributors](../../../../contributors)
+This project exists thanks to all the people who [contribute](../../contributors).
 
 ## License
 
-[MIT](LICENSE) © [ArkEcosystem](https://ark.io)
+[MIT](LICENSE) © [ARK Ecosystem](https://ark.io)
