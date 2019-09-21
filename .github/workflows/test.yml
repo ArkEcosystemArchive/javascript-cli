@@ -1,0 +1,31 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x, 11.x, 12.x]
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install required packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install libudev-dev libusb-1.0-0-dev
+      - name: Install global packages
+        run: yarn global add node-gyp
+      - name: Install HID packages
+        run: yarn add node-hid --build-from-source
+      - name: Codecov
+        run: ./node_modules/.bin/codecov --token=${{ secrets.CODECOV_TOKEN }}
+
+        env:
+          CI: true
