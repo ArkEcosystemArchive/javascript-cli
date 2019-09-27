@@ -29,7 +29,7 @@
     "bs58check": "^2.1.2",
     "chalk": "^2.4.1",
     "figlet": "^1.2.0",
-    "is-reachable": "^2.4.0",
+    "is-reachable": "^4.0.0",
     "is-url": "^1.2.4",
     "joi": "^13.2.0",
     "ledgerco": "github:ledgerhq/ledger-node-js-api#6cde5978b9d0a4922f0d33520b16cc2184559ebc",
